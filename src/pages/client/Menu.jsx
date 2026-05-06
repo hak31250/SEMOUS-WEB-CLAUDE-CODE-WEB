@@ -2,8 +2,14 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProductCard from '@/components/menu/ProductCard'
 import { Loader2 } from 'lucide-react'
+import { useSeo } from '@/hooks/useSeo'
 
 export default function Menu() {
+  useSeo({
+    title: 'Menu',
+    description: 'Découvrez les bols SEMOUS : semoule fine, toppings généreux, sauces maison. 100% halal. Livraison à Toulouse ou retrait sur place.',
+    keywords: 'menu semous, bol semoule, halal toulouse',
+  })
   const [categories, setCategories] = useState([])
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)

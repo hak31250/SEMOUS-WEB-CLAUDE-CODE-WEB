@@ -1,6 +1,11 @@
 import { MapPin, Clock, Phone, MessageCircle } from 'lucide-react'
+import { useSeo } from '@/hooks/useSeo'
 
 export default function Contact() {
+  useSeo({
+    title: 'Contact',
+    description: 'Contactez SEMOUS par WhatsApp, Snapchat ou consultez nos horaires et adresse à Toulouse.',
+  })
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       <h1 className="section-title mb-8">Contact</h1>

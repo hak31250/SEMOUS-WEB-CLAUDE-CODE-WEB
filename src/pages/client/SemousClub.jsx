@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { Star, Gift, Trophy, Zap } from 'lucide-react'
+import { useSeo } from '@/hooks/useSeo'
 
 export default function SemousClub() {
+  useSeo({ title: 'SEMOUS CLUB', description: 'Rejoignez le programme de fidélité SEMOUS. Points, récompenses, offres exclusives — bientôt disponible.' })
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 text-center">
       <p className="text-xs font-semibold uppercase tracking-widest text-semous-gray-text mb-3">Bientôt disponible</p>

@@ -1,7 +1,13 @@
 import { Link } from 'react-router-dom'
 import { MapPin, Clock, Truck, ShoppingBag, Star } from 'lucide-react'
+import { useSeo } from '@/hooks/useSeo'
 
 export default function Home() {
+  useSeo({
+    title: 'Accueil',
+    description: 'SEMOUS — Bols à la semoule halal à Toulouse. Commandez en ligne pour la livraison ou le retrait. Ouvert tous les soirs dès 19h.',
+    keywords: 'semous, semoule, halal, toulouse, livraison, retrait, commande en ligne',
+  })
   return (
     <div className="min-h-screen">
       {/* Hero */}

@@ -2,8 +2,14 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Building2, Clock, Users, CheckCircle, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useSeo } from '@/hooks/useSeo'
 
 export default function Enterprise() {
+  useSeo({
+    title: 'Commandes entreprises',
+    description: 'Commandez en groupe pour votre entreprise ou événement. SEMOUS propose des formules entreprise dès 70 EUR, livraison ou retrait à Toulouse.',
+    keywords: 'commande groupe, entreprise, événement, semoule, toulouse',
+  })
   const [form, setForm] = useState({
     nom_groupe: '', prenom_referent: '', email_referent: '', telephone_referent: '',
     adresse_livraison: '', date_souhaitee: '', heure_souhaitee: '',

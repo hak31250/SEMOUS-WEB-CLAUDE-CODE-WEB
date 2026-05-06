@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { useSeo } from '@/hooks/useSeo'
 
 const DEFAULT_FAQS = [
   { question: 'Quelle est la zone de livraison ?', reponse: 'SEMOUS livre dans un rayon de 7 km autour du restaurant (32 av. Honoré Serres, Toulouse). Au-delà, le retrait à emporter est disponible ou consultez Uber Eats / Deliveroo.' },
@@ -13,6 +14,10 @@ const DEFAULT_FAQS = [
 ]
 
 export default function FAQ() {
+  useSeo({
+    title: 'FAQ',
+    description: 'Toutes vos questions sur les commandes SEMOUS : zone de livraison, frais, horaires, paiement, produits halal.',
+  })
   const [faqs, setFaqs] = useState(DEFAULT_FAQS)
   const [open, setOpen] = useState(null)
 

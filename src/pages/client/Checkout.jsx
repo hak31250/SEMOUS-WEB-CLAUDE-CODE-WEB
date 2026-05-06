@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSeo } from '@/hooks/useSeo'
 import { useCartStore, useCartTotals, LIVRAISON_MINIMUM } from '@/store/cartStore'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
@@ -9,6 +10,7 @@ import { Truck, ShoppingBag, Loader2, MapPin, Tag, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function Checkout() {
+  useSeo({ title: 'Passer commande', description: 'Finalisez votre commande SEMOUS — livraison ou retrait à Toulouse.' })
   const navigate = useNavigate()
   const { user, profile } = useAuthStore()
   const { items, mode, setMode, codePromo, applyCode, removeCode, clearCart } = useCartStore()
