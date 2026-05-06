@@ -8,4 +8,17 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'supabase': ['@supabase/supabase-js'],
+          'ui': ['lucide-react', 'react-hot-toast'],
+          'state': ['zustand'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
 })

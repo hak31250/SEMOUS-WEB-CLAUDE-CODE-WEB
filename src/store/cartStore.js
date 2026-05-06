@@ -1,27 +1,46 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-const LIVRAISON_MINIMUM = 15
-const LIVRAISON_OFFERTE_A = 20
+export const LIVRAISON_MINIMUM = 15
+export const LIVRAISON_OFFERTE_A = 20
 
-const DELIVERY_RULES = [
+export const DELIVERY_RULES = [
   { min: 0, max: 3, frais: 3, tempsMin: 10, tempsMax: 12 },
   { min: 3, max: 5, frais: 4, tempsMin: 12, tempsMax: 15 },
   { min: 5, max: 7, frais: 5, tempsMin: 15, tempsMax: 17 },
 ]
 
-function calcDeliveryFee(distanceKm, sousTotal) {
-  const rule = DELIVERY_RULES.find(r => distanceKm >= r.min && distanceKm < r.max)
-  if (!rule) return null
+export function calcDeliveryFee(distanceKm, sousTotal) {
   if (sousTotal >= LIVRAISON_OFFERTE_A) return 0
-  return rule.frais
+  const rule = DELIVERY_RULES.find(r => distanceKm >= r.min && distanceKm < r.max)
+  return rule ? rule.frais : null
+}
+
+export function computeCartTotals(items, mode, distanceKm, reduction) {
+  const sousTotal = items.reduce((sum, i) => {
+    const optionsPrice = Object.values(i.options || {}).reduce(
+      (s, o) => s + (o?.prix_supplement || 0), 0
+    )
+    return sum + (i.product.prix_ttc + optionsPrice) * i.quantity
+  }, 0)
+
+  const fraisLivraison = mode === 'livraison' && distanceKm !== null
+    ? (calcDeliveryFee(distanceKm, sousTotal) ?? 0)
+    : 0
+
+  const totalFinal = Math.max(0, sousTotal + fraisLivraison - (reduction || 0))
+  const itemCount = items.reduce((sum, i) => sum + i.quantity, 0)
+  const isDeliveryEligible = mode !== 'livraison' || sousTotal >= LIVRAISON_MINIMUM
+  const deliveryZoneBlocked = mode === 'livraison' && distanceKm !== null && distanceKm >= 7
+
+  return { sousTotal, fraisLivraison, totalFinal, itemCount, isDeliveryEligible, deliveryZoneBlocked }
 }
 
 export const useCartStore = create(
   persist(
     (set, get) => ({
       items: [],
-      mode: 'retrait', // 'livraison' | 'retrait'
+      mode: 'retrait',
       address: null,
       distanceKm: null,
       codePromo: null,
@@ -32,75 +51,25 @@ export const useCartStore = create(
           const key = `${product.id}-${JSON.stringify(options)}`
           const existing = state.items.find(i => i.key === key)
           if (existing) {
-            return {
-              items: state.items.map(i =>
-                i.key === key ? { ...i, quantity: i.quantity + quantity } : i
-              ),
-            }
+            return { items: state.items.map(i => i.key === key ? { ...i, quantity: i.quantity + quantity } : i) }
           }
-          return {
-            items: [...state.items, { key, product, quantity, options }],
-          }
+          return { items: [...state.items, { key, product, quantity, options }] }
         })
       },
 
-      removeItem: (key) => {
-        set(state => ({ items: state.items.filter(i => i.key !== key) }))
-      },
+      removeItem: (key) => set(state => ({ items: state.items.filter(i => i.key !== key) })),
 
       updateQuantity: (key, quantity) => {
-        if (quantity <= 0) {
-          get().removeItem(key)
-          return
-        }
-        set(state => ({
-          items: state.items.map(i => i.key === key ? { ...i, quantity } : i),
-        }))
+        if (quantity <= 0) { get().removeItem(key); return }
+        set(state => ({ items: state.items.map(i => i.key === key ? { ...i, quantity } : i) }))
       },
 
       clearCart: () => set({ items: [], codePromo: null, reduction: 0 }),
-
       setMode: (mode) => set({ mode }),
       setAddress: (address) => set({ address }),
       setDistance: (km) => set({ distanceKm: km }),
       applyCode: (code, reduction) => set({ codePromo: code, reduction }),
       removeCode: () => set({ codePromo: null, reduction: 0 }),
-
-      get sousTotal() {
-        return get().items.reduce((sum, i) => {
-          const optionsPrice = Object.values(i.options).reduce(
-            (s, o) => s + (o?.prix_supplement || 0), 0
-          )
-          return sum + (i.product.prix_ttc + optionsPrice) * i.quantity
-        }, 0)
-      },
-
-      get fraisLivraison() {
-        const state = get()
-        if (state.mode !== 'livraison') return 0
-        if (state.distanceKm === null) return 0
-        return calcDeliveryFee(state.distanceKm, state.sousTotal) ?? 0
-      },
-
-      get totalFinal() {
-        const state = get()
-        return Math.max(0, state.sousTotal + state.fraisLivraison - state.reduction)
-      },
-
-      get itemCount() {
-        return get().items.reduce((sum, i) => sum + i.quantity, 0)
-      },
-
-      get isDeliveryEligible() {
-        const state = get()
-        if (state.mode !== 'livraison') return true
-        return state.sousTotal >= LIVRAISON_MINIMUM
-      },
-
-      get deliveryZoneBlocked() {
-        const state = get()
-        return state.mode === 'livraison' && state.distanceKm !== null && state.distanceKm >= 7
-      },
     }),
     {
       name: 'semous-cart',
@@ -116,4 +85,6 @@ export const useCartStore = create(
   )
 )
 
-export { LIVRAISON_MINIMUM, LIVRAISON_OFFERTE_A, DELIVERY_RULES, calcDeliveryFee }
+export function useCartTotals() {
+  return useCartStore(state => computeCartTotals(state.items, state.mode, state.distanceKm, state.reduction))
+}

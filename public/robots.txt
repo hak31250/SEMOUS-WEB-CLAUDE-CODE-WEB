@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /commande/confirmation/
+
+Sitemap: https://semous.fr/sitemap.xml
