@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { formatDate } from '@/utils/format'
 import { UserCog, Plus, Loader2, Check, X, Pencil } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -132,7 +131,7 @@ function InviteForm({ onClose, onSaved }) {
   async function handleInvite() {
     if (!email) return
     setLoading(true)
-    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
+    const { data: _data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
       data: { role },
     }).catch(() => ({ error: { message: 'API admin non disponible côté client' } }))
 
@@ -167,7 +166,7 @@ function InviteForm({ onClose, onSaved }) {
             </select>
           </div>
           <p className="text-xs text-semous-gray-text bg-semous-gray rounded-lg p-3">
-            L'invitation est envoyée par email. La personne devra créer son mot de passe via le lien reçu.
+            L&apos;invitation est envoyée par email. La personne devra créer son mot de passe via le lien reçu.
           </p>
         </div>
         <div className="flex gap-3 mt-5">

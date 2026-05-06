@@ -16,14 +16,14 @@ export default function Confidentialite() {
       <h2>2. Données collectées</h2>
       <p>Dans le cadre de la gestion de vos commandes, SEMOUS collecte uniquement les données strictement nécessaires :</p>
       <ul>
-        <li><strong>Données d'identification</strong> : prénom, nom</li>
+        <li><strong>Données d&apos;identification</strong> : prénom, nom</li>
         <li><strong>Coordonnées</strong> : adresse e-mail, numéro de téléphone</li>
         <li><strong>Adresse de livraison</strong> : uniquement pour les commandes en livraison</li>
         <li><strong>Données de commande</strong> : détail des articles, montants, statut de commande</li>
         <li><strong>Données de navigation</strong> : cookies techniques nécessaires au fonctionnement du site (voir politique cookies)</li>
       </ul>
       <p>
-        <strong>Aucune donnée bancaire</strong> n'est collectée ni stockée par SEMOUS. Le paiement en ligne est géré par un prestataire certifié PCI-DSS.
+        <strong>Aucune donnée bancaire</strong> n&apos;est collectée ni stockée par SEMOUS. Le paiement en ligne est géré par un prestataire certifié PCI-DSS.
       </p>
 
       <h2>3. Finalités et bases légales du traitement</h2>
@@ -68,18 +68,18 @@ export default function Confidentialite() {
         <li><strong>Données de commande</strong> : 3 ans (données clients) / 10 ans (obligations comptables)</li>
         <li><strong>Données de support</strong> : 1 an après clôture du ticket</li>
         <li><strong>Données de navigation / cookies</strong> : 13 mois maximum (voir politique cookies)</li>
-        <li><strong>Consentements marketing</strong> : 3 ans à compter du recueil du consentement, ou jusqu'au retrait</li>
+        <li><strong>Consentements marketing</strong> : 3 ans à compter du recueil du consentement, ou jusqu&apos;au retrait</li>
       </ul>
 
       <h2>5. Destinataires des données</h2>
-      <p>Vos données sont susceptibles d'être transmises à :</p>
+      <p>Vos données sont susceptibles d&apos;être transmises à :</p>
       <ul>
         <li><strong>Supabase Inc.</strong> (hébergeur base de données, serveurs UE) — contrat de traitement conforme RGPD</li>
         <li><strong>Netlify Inc.</strong> (hébergeur du site web, serveurs UE) — contrat de traitement conforme RGPD</li>
-        <li><strong>Resend Inc.</strong> (envoi d'e-mails transactionnels) — contrat de traitement conforme RGPD</li>
+        <li><strong>Resend Inc.</strong> (envoi d&apos;e-mails transactionnels) — contrat de traitement conforme RGPD</li>
         <li>Les membres du personnel de SEMOUS habilités à traiter votre commande</li>
       </ul>
-      <p>Aucune vente, location ou partage de vos données à des tiers à des fins commerciales n'est effectué.</p>
+      <p>Aucune vente, location ou partage de vos données à des tiers à des fins commerciales n&apos;est effectué.</p>
 
       <h2>6. Transferts hors Union Européenne</h2>
       <p>
@@ -89,20 +89,20 @@ export default function Confidentialite() {
       <h2>7. Vos droits</h2>
       <p>Conformément au Règlement Général sur la Protection des Données (RGPD — UE 2016/679) et à la loi Informatique et Libertés, vous disposez des droits suivants :</p>
       <ul>
-        <li><strong>Droit d'accès</strong> (art. 15) : obtenir une copie de vos données personnelles</li>
+        <li><strong>Droit d&apos;accès</strong> (art. 15) : obtenir une copie de vos données personnelles</li>
         <li><strong>Droit de rectification</strong> (art. 16) : corriger des données inexactes ou incomplètes</li>
-        <li><strong>Droit à l'effacement</strong> (art. 17) : demander la suppression de vos données</li>
+        <li><strong>Droit à l&apos;effacement</strong> (art. 17) : demander la suppression de vos données</li>
         <li><strong>Droit à la limitation</strong> (art. 18) : limiter le traitement de vos données</li>
         <li><strong>Droit à la portabilité</strong> (art. 20) : recevoir vos données dans un format structuré</li>
-        <li><strong>Droit d'opposition</strong> (art. 21) : vous opposer au traitement basé sur l'intérêt légitime ou à des fins de prospection</li>
+        <li><strong>Droit d&apos;opposition</strong> (art. 21) : vous opposer au traitement basé sur l&apos;intérêt légitime ou à des fins de prospection</li>
         <li><strong>Droit de retrait du consentement</strong> : à tout moment, sans effet sur les traitements passés</li>
       </ul>
       <p>
         Pour exercer ces droits, contactez-nous à <strong>contact@semous.fr</strong> ou via notre{' '}
-        <a href="/contact">formulaire de contact</a>. Nous nous engageons à répondre dans un délai d'un mois.
+        <a href="/contact">formulaire de contact</a>. Nous nous engageons à répondre dans un délai d&apos;un mois.
       </p>
       <p>
-        En cas de réponse insatisfaisante, vous pouvez introduire une réclamation auprès de la <strong>CNIL</strong> (Commission Nationale de l'Informatique et des Libertés) : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>.
+        En cas de réponse insatisfaisante, vous pouvez introduire une réclamation auprès de la <strong>CNIL</strong> (Commission Nationale de l&apos;Informatique et des Libertés) : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>.
       </p>
 
       <h2>8. Sécurité</h2>

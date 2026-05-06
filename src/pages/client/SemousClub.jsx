@@ -32,7 +32,7 @@ export default function SemousClub() {
         Créer mon compte SEMOUS
       </Link>
       <p className="text-xs text-semous-gray-text mt-4">
-        Un compte SEMOUS vous permettra d'accéder au SEMOUS CLUB dès son lancement.
+        Un compte SEMOUS vous permettra d&apos;accéder au SEMOUS CLUB dès son lancement.
       </p>
     </div>
   )

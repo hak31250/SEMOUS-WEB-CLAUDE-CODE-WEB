@@ -28,6 +28,7 @@ export default function Support() {
   const [filterStatus, setFilterStatus] = useState('ouvert')
   const messagesEndRef = useRef(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadTickets() }, [filterStatus])
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function Support() {
         })
       .subscribe()
     return () => supabase.removeChannel(channel)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?.id])
 
   useEffect(() => {

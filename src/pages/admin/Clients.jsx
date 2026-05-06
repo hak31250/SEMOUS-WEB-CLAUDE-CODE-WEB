@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { formatDate, formatPrice } from '@/utils/format'
+import { formatDate } from '@/utils/format'
 import { Search, Users, Loader2 } from 'lucide-react'
 
 export default function Clients() {

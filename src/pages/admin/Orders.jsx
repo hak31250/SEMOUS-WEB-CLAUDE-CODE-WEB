@@ -15,6 +15,7 @@ export default function Orders() {
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [detailOrder, setDetailOrder] = useState(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load() }, [filterStatus])
 
   async function load() {

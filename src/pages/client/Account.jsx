@@ -149,7 +149,7 @@ export default function Account() {
           <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin" /></div>
         ) : orders.length === 0 ? (
           <div className="card p-8 text-center text-semous-gray-text">
-            <p className="mb-4">Vous n'avez pas encore de commande.</p>
+            <p className="mb-4">Vous n&apos;avez pas encore de commande.</p>
             <Link to="/menu" className="btn-primary inline-block">Commander maintenant</Link>
           </div>
         ) : (

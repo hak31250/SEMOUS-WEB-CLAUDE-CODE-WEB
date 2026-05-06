@@ -5,9 +5,6 @@ import { MapPin, Navigation, Package, CheckCircle, Loader2, Users } from 'lucide
 import { buildWazeUrl } from '@/utils/delivery'
 import toast from 'react-hot-toast'
 
-const RESTAURANT_LAT = 43.5993
-const RESTAURANT_LNG = 1.4327
-
 function haversine(lat1, lng1, lat2, lng2) {
   const R = 6371
   const dLat = (lat2 - lat1) * Math.PI / 180

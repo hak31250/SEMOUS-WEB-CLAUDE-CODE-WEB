@@ -21,6 +21,7 @@ export default function PopupDisplay() {
           setPopups(data.filter(p => !dismissed.includes(p.id)))
         }
       })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function dismiss(id) {

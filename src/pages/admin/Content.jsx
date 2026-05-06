@@ -237,7 +237,7 @@ function FaqModal({ faq, onSave, onClose }) {
             <textarea className="input-field resize-none" rows={5} value={form.reponse} onChange={e => setForm(f => ({ ...f, reponse: e.target.value }))} placeholder="Réponse détaillée..." />
           </div>
           <div>
-            <label className="text-xs font-semibold text-semous-gray-text mb-1.5 block">Ordre d'affichage</label>
+            <label className="text-xs font-semibold text-semous-gray-text mb-1.5 block">Ordre d&apos;affichage</label>
             <input type="number" className="input-field w-24" value={form.ordre} onChange={e => setForm(f => ({ ...f, ordre: parseInt(e.target.value) || 0 }))} />
           </div>
         </div>

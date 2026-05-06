@@ -105,7 +105,7 @@ export default function OrderTicket({ order, items }) {
   )
 }
 
-export function printTicket(order, items) {
+export function printTicket(order, _items) {
   const ticketEl = document.getElementById('ticket-print')
   if (!ticketEl) return
 

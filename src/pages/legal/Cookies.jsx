@@ -3,8 +3,8 @@ export default function Cookies() {
     <div className="max-w-3xl mx-auto px-4 py-10 prose prose-sm">
       <h1>Politique cookies</h1>
 
-      <h2>Qu'est-ce qu'un cookie ?</h2>
-      <p>Un cookie est un petit fichier stocké sur votre appareil lors de la visite d'un site web. Il permet de mémoriser vos préférences et d'améliorer votre expérience.</p>
+      <h2>Qu&apos;est-ce qu&apos;un cookie ?</h2>
+      <p>Un cookie est un petit fichier stocké sur votre appareil lors de la visite d&apos;un site web. Il permet de mémoriser vos préférences et d&apos;améliorer votre expérience.</p>
 
       <h2>Cookies utilisés</h2>
       <table>
@@ -20,7 +20,7 @@ export default function Cookies() {
       <p>Vous pouvez à tout moment modifier vos préférences en matière de cookies via le bandeau cookies disponible sur le site, ou en modifiant les paramètres de votre navigateur.</p>
 
       <h2>Cookies tiers</h2>
-      <p>En V1, aucun cookie tiers de tracking ou de publicité n'est utilisé sur semous.fr.</p>
+      <p>En V1, aucun cookie tiers de tracking ou de publicité n&apos;est utilisé sur semous.fr.</p>
     </div>
   )
 }

@@ -23,7 +23,7 @@ export function playNotificationBeep() {
     beep(now + 0.15, 1100, 0.12)
 
     setTimeout(() => ctx.close(), 500)
-  } catch (_) {
+  } catch {
     // Audio not available — silent fail
   }
 }

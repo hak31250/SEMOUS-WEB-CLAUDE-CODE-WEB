@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSeo } from '@/hooks/useSeo'
 import { useStoreStatus } from '@/hooks/useStoreStatus'
-import { useCartStore, useCartTotals, LIVRAISON_MINIMUM } from '@/store/cartStore'
+import { useCartStore, useCartTotals } from '@/store/cartStore'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { formatPrice, generateOrderNumber } from '@/utils/format'
@@ -230,8 +230,8 @@ export default function Checkout() {
           {/* CGV */}
           <div className="flex flex-col gap-3">
             {[
-              { state: cgvAccepted, set: setCgvAccepted, label: <>J'accepte les <a href="/legal/cgv" target="_blank" className="underline">CGV</a> de SEMOUS *</> },
-              { state: rgpdAccepted, set: setRgpdAccepted, label: <>J'accepte la <a href="/legal/confidentialite" target="_blank" className="underline">politique de confidentialité</a> *</> },
+              { state: cgvAccepted, set: setCgvAccepted, label: <>J&apos;accepte les <a href="/legal/cgv" target="_blank" className="underline">CGV</a> de SEMOUS *</> },
+              { state: rgpdAccepted, set: setRgpdAccepted, label: <>J&apos;accepte la <a href="/legal/confidentialite" target="_blank" className="underline">politique de confidentialité</a> *</> },
             ].map((item, i) => (
               <label key={i} className="flex items-start gap-3 text-sm cursor-pointer">
                 <input type="checkbox" className="mt-0.5" checked={item.state} onChange={e => item.set(e.target.checked)} />

@@ -64,7 +64,7 @@ export default function Enterprise() {
         <h1 className="text-2xl font-bold mb-3">Demande envoyée !</h1>
         <p className="text-semous-gray-text text-sm mb-6">
           Votre demande de commande groupe a bien été reçue.
-          L'équipe SEMOUS vous contactera dans les meilleurs délais pour confirmer les détails.
+          L&apos;équipe SEMOUS vous contactera dans les meilleurs délais pour confirmer les détails.
         </p>
       </div>
     )
@@ -74,7 +74,7 @@ export default function Enterprise() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="section-title mb-2">Commandes groupes & entreprises</h1>
       <p className="text-semous-gray-text text-sm mb-8">
-        Repas d'équipe, salariés, associations, syndics ou groupes ponctuels.
+        Repas d&apos;équipe, salariés, associations, syndics ou groupes ponctuels.
       </p>
 
       {/* Règles */}
@@ -98,10 +98,10 @@ export default function Enterprise() {
         <p className="font-semibold text-semous-black mb-2">Conditions</p>
         <p>
           SEMOUS propose un service de commandes groupées pour les équipes, salariés, entreprises, syndics,
-          associations ou groupes. Toute commande groupe doit être demandée au moins 24 heures à l'avance.
+          associations ou groupes. Toute commande groupe doit être demandée au moins 24 heures à l&apos;avance.
           Le montant minimum est fixé à 70 EUR. Un acompte de 30 % pourra être demandé pour confirmer la commande.
-          Toute annulation doit être faite au moins 12 heures avant l'heure prévue.
-          Les ajouts sont possibles jusqu'à 2 heures avant, sous réserve d'acceptation par SEMOUS.
+          Toute annulation doit être faite au moins 12 heures avant l&apos;heure prévue.
+          Les ajouts sont possibles jusqu&apos;à 2 heures avant, sous réserve d&apos;acceptation par SEMOUS.
         </p>
       </div>
 

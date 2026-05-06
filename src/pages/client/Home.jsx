@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Truck, ShoppingBag, AlertCircle, CheckCircle } from 'lucide-react'
+import { MapPin, Truck, ShoppingBag, AlertCircle } from 'lucide-react'
 import { useSeo } from '@/hooks/useSeo'
 import { useStoreStatus } from '@/hooks/useStoreStatus'
 
@@ -92,7 +92,7 @@ export default function Home() {
       {/* Horaires */}
       <section className="py-12 px-4 bg-semous-gray">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="section-title mb-6">Horaires d'ouverture</h2>
+          <h2 className="section-title mb-6">Horaires d&apos;ouverture</h2>
           <div className="inline-grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="card px-6 py-4">
               <p className="font-semibold mb-1">Lundi – Jeudi & Dimanche</p>
@@ -116,7 +116,7 @@ export default function Home() {
           <div className="card p-8 text-center">
             <h2 className="section-title mb-3">Commandes groupes & entreprises</h2>
             <p className="text-semous-gray-text text-sm mb-6 max-w-lg mx-auto">
-              Repas d'équipe, salariés, associations ? SEMOUS propose un service dédié
+              Repas d&apos;équipe, salariés, associations ? SEMOUS propose un service dédié
               pour les commandes groupées à partir de 70 EUR.
             </p>
             <Link to="/entreprises" className="btn-green inline-block">

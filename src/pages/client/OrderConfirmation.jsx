@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import { formatPrice, formatDate, orderStatusLabel } from '@/utils/format'
+import { formatPrice, formatDate } from '@/utils/format'
 import { CheckCircle, Clock, Loader2, ChefHat, Truck, Package, AlertCircle } from 'lucide-react'
 import { useSeo } from '@/hooks/useSeo'
 
@@ -14,8 +14,6 @@ const STATUS_STEPS = [
   { key: 'livree', label: 'Livrée', icon: CheckCircle, desc: 'Commande livrée. Bon appétit !' },
   { key: 'terminee', label: 'Terminée', icon: CheckCircle, desc: 'Commande terminée. Merci !' },
 ]
-
-const TERMINAL_STATUSES = ['livree', 'terminee', 'refusee', 'annulee']
 
 function getStepIndex(statut) {
   return STATUS_STEPS.findIndex(s => s.key === statut)
@@ -97,7 +95,7 @@ export default function OrderConfirmation() {
             )}
 
             <div className="flex flex-col gap-5 relative">
-              {visibleSteps.map((step, i) => {
+              {visibleSteps.map((step, _i) => {
                 const sIdx = getStepIndex(step.key)
                 const done = currentStepIdx >= sIdx && currentStepIdx !== -1
                 const active = order.statut === step.key

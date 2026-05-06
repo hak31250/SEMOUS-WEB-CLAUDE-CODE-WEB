@@ -73,7 +73,7 @@ export default function Stocks() {
       {lowStock.length > 0 && (
         <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
           <p className="font-semibold text-orange-700 flex items-center gap-2 mb-2">
-            <AlertTriangle size={16} />Stock faible — seuil d'alerte ({lowStock.length})
+            <AlertTriangle size={16} />Stock faible — seuil d&apos;alerte ({lowStock.length})
           </p>
           <div className="flex flex-wrap gap-2">
             {lowStock.map(s => (
@@ -133,7 +133,7 @@ export default function Stocks() {
         {stocks.length === 0 && (
           <div className="card p-10 text-center text-semous-gray-text">
             <p className="mb-2">Aucun stock configuré</p>
-            <p className="text-xs">Les stocks sont créés automatiquement à l'ajout d'un produit.</p>
+            <p className="text-xs">Les stocks sont créés automatiquement à l&apos;ajout d&apos;un produit.</p>
           </div>
         )}
       </div>

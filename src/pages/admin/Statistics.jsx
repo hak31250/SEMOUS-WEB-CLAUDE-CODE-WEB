@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { formatPrice, formatDate } from '@/utils/format'
+import { formatPrice } from '@/utils/format'
 import { TrendingUp, ShoppingBag, Users, Truck, RotateCcw, Tag, Loader2 } from 'lucide-react'
 
 const PERIODS = [
@@ -24,6 +24,7 @@ export default function Statistics() {
   const [dailyCA, setDailyCA] = useState([])
   const [loading, setLoading] = useState(true)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load() }, [period])
 
   async function load() {

@@ -12,9 +12,9 @@ export default function MentionsLegales() {
       <h2>Hébergement</h2>
       <p>Ce site est hébergé par Netlify, Inc. — 2325 3rd Street, Suite 215, San Francisco, CA 94107, États-Unis.</p>
       <h2>Propriété intellectuelle</h2>
-      <p>L'ensemble des contenus de ce site (textes, images, logos) sont la propriété exclusive de SEMOUS / Hounivers. Toute reproduction est interdite sans autorisation.</p>
+      <p>L&apos;ensemble des contenus de ce site (textes, images, logos) sont la propriété exclusive de SEMOUS / Hounivers. Toute reproduction est interdite sans autorisation.</p>
       <h2>Responsabilité</h2>
-      <p>SEMOUS s'efforce de fournir des informations exactes et à jour sur ce site. SEMOUS ne peut être tenu responsable des erreurs ou omissions dans les informations publiées.</p>
+      <p>SEMOUS s&apos;efforce de fournir des informations exactes et à jour sur ce site. SEMOUS ne peut être tenu responsable des erreurs ou omissions dans les informations publiées.</p>
     </div>
   )
 }

@@ -47,7 +47,7 @@ export async function createPaymentRecord({ orderId, montant, methode = 'carte' 
  * En production : appeler la Supabase Edge Function `create-payment-intent`
  * qui communique avec le prestataire (Stripe, PayPlug, etc.)
  */
-export async function initiateOnlinePayment({ orderId, montant, metadata = {} }) {
+export async function initiateOnlinePayment({ orderId, montant, metadata: _metadata = {} }) {
   // TODO: remplacer par appel à la Edge Function quand prestataire choisi
   // const { data, error } = await supabase.functions.invoke('create-payment-intent', {
   //   body: { order_id: orderId, amount: Math.round(montant * 100), currency: 'eur', metadata }
