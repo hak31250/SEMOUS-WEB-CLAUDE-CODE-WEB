@@ -8,6 +8,14 @@ export default defineConfig({
       '@': '/src',
     },
   },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: [],
+    alias: {
+      '@': '/src',
+    },
+  },
   build: {
     rollupOptions: {
       output: {

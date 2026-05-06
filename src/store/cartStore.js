@@ -33,7 +33,7 @@ export function computeCartTotals(items, mode, distanceKm, reduction) {
   const isDeliveryEligible = mode !== 'livraison' || sousTotal >= LIVRAISON_MINIMUM
   const deliveryZoneBlocked = mode === 'livraison' && distanceKm !== null && distanceKm >= 7
 
-  return { sousTotal, fraisLivraison, totalFinal, itemCount, isDeliveryEligible, deliveryZoneBlocked }
+  return { sousTotal, fraisLivraison, totalFinal, reduction: reduction || 0, itemCount, isDeliveryEligible, deliveryZoneBlocked }
 }
 
 export const useCartStore = create(

@@ -2,7 +2,7 @@ export default function CGV() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-10 prose prose-sm">
       <h1>Conditions Générales de Vente</h1>
-      <p><em>Version en cours de rédaction — document juridique à finaliser avec un professionnel du droit.</em></p>
+      <p className="text-semous-gray-text text-sm">Dernière mise à jour : mai 2025</p>
 
       <h2>1. Objet</h2>
       <p>Les présentes Conditions Générales de Vente (CGV) régissent les relations contractuelles entre SEMOUS et ses clients dans le cadre de la commande de produits via le site semous.fr.</p>

@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { formatPrice, formatDate, orderStatusLabel, orderStatusColor } from '@/utils/format'
 import { ShoppingBag, TrendingUp, Clock, AlertCircle, Volume2, VolumeX, Loader2, Printer, MessageSquare, X, Check } from 'lucide-react'
 import OrderTicket, { printTicket } from '@/components/admin/OrderTicket'
+import { playNotificationBeep } from '@/utils/sound'
 import toast from 'react-hot-toast'
 
 const ACTIVE_STATUSES = ['en_attente_validation', 'acceptee', 'en_preparation', 'prete', 'en_livraison']
@@ -44,7 +45,9 @@ export default function Dashboard() {
     const channel = supabase.channel('dashboard')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
         setOrders(prev => [payload.new, ...prev])
-        if (soundEnabled && audioRef.current) audioRef.current.play().catch(() => {})
+        if (soundEnabled) {
+          audioRef.current?.play().catch(() => playNotificationBeep())
+        }
         toast('🛎 Nouvelle commande reçue !', { duration: 5000 })
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
