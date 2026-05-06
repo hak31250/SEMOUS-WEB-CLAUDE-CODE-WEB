@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Clock, Truck, ShoppingBag, Star } from 'lucide-react'
+import { MapPin, Truck, ShoppingBag, AlertCircle, CheckCircle } from 'lucide-react'
 import { useSeo } from '@/hooks/useSeo'
+import { useStoreStatus } from '@/hooks/useStoreStatus'
 
 export default function Home() {
   useSeo({
@@ -8,8 +9,18 @@ export default function Home() {
     description: 'SEMOUS — Bols à la semoule halal à Toulouse. Commandez en ligne pour la livraison ou le retrait. Ouvert tous les soirs dès 19h.',
     keywords: 'semous, semoule, halal, toulouse, livraison, retrait, commande en ligne',
   })
+  const { isOpen, hoursOpen, commandesActives, closedMessage } = useStoreStatus()
+
   return (
     <div className="min-h-screen">
+      {/* Closed banner */}
+      {!isOpen && (
+        <div className={`px-4 py-3 text-center text-sm font-medium flex items-center justify-center gap-2 ${commandesActives ? 'bg-orange-500 text-white' : 'bg-red-600 text-white'}`}>
+          <AlertCircle size={16} />
+          {closedMessage || (!hoursOpen ? 'Nous sommes fermés pour le moment. Réouverture ce soir à 19h.' : 'Les commandes sont temporairement indisponibles.')}
+        </div>
+      )}
+
       {/* Hero */}
       <section className="bg-semous-black text-white py-20 px-4">
         <div className="max-w-2xl mx-auto text-center">
@@ -17,16 +28,20 @@ export default function Home() {
             Des bols généreux,<br />
             <span className="text-gray-300">vraiment halal.</span>
           </h1>
-          <p className="text-gray-400 text-lg mb-8">
+          <p className="text-gray-400 text-lg mb-3">
             SEMOUS — Restaurant halal à Toulouse.<br />
             Commande en ligne, livraison ou retrait.
           </p>
+          <div className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full mb-6 ${isOpen ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
+            <span className={`w-2 h-2 rounded-full ${isOpen ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+            {isOpen ? 'Ouvert — commandes en ligne' : 'Actuellement fermé'}
+          </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link to="/menu" className="btn-primary text-center">
-              Commander maintenant
+              {isOpen ? 'Commander maintenant' : 'Voir la carte'}
             </Link>
             <Link to="/menu" className="btn-secondary bg-transparent text-white border-white hover:bg-white hover:text-semous-black text-center">
-              Voir la carte
+              Notre carte
             </Link>
           </div>
         </div>

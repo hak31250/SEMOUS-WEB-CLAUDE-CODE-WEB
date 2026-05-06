@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, ShoppingBag, ChefHat, Truck, Package,
   BarChart3, Users, Building2, CreditCard, Tag, FileText,
-  Settings, ScrollText, LogOut, Menu, X, UserCog, HeadphonesIcon
+  Settings, ScrollText, LogOut, Menu, X, UserCog, Headphones, TrendingUp
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import toast from 'react-hot-toast'
@@ -19,8 +19,9 @@ const navItems = [
   { to: '/admin/entreprises', label: 'Entreprises', icon: Building2 },
   { to: '/admin/paiements', label: 'Paiements', icon: CreditCard },
   { to: '/admin/codes', label: 'Codes promo', icon: Tag },
+  { to: '/admin/statistiques', label: 'Statistiques', icon: TrendingUp },
   { to: '/admin/contenus', label: 'Contenus SEO', icon: FileText },
-  { to: '/admin/support', label: 'Support', icon: HeadphonesIcon },
+  { to: '/admin/support', label: 'Support', icon: Headphones },
   { to: '/admin/roles', label: 'Rôles', icon: UserCog },
   { to: '/admin/parametres', label: 'Paramètres', icon: Settings },
   { to: '/admin/logs', label: 'Logs', icon: ScrollText },

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSeo } from '@/hooks/useSeo'
+import { useStoreStatus } from '@/hooks/useStoreStatus'
 import { useCartStore, useCartTotals, LIVRAISON_MINIMUM } from '@/store/cartStore'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
@@ -11,6 +12,7 @@ import toast from 'react-hot-toast'
 
 export default function Checkout() {
   useSeo({ title: 'Passer commande', description: 'Finalisez votre commande SEMOUS — livraison ou retrait à Toulouse.' })
+  const { isOpen, closedMessage } = useStoreStatus()
   const navigate = useNavigate()
   const { user, profile } = useAuthStore()
   const { items, mode, setMode, codePromo, applyCode, removeCode, clearCart } = useCartStore()
@@ -27,6 +29,16 @@ export default function Checkout() {
   const [addressError, setAddressError] = useState('')
   const [cgvAccepted, setCgvAccepted] = useState(false)
   const [rgpdAccepted, setRgpdAccepted] = useState(false)
+
+  if (!isOpen) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-16 text-center">
+        <p className="text-xl font-bold mb-3">Commandes fermées</p>
+        <p className="text-semous-gray-text text-sm mb-6">{closedMessage || 'Les commandes sont actuellement fermées. Revenez ce soir dès 19h !'}</p>
+        <button onClick={() => navigate('/menu')} className="btn-primary">Voir la carte</button>
+      </div>
+    )
+  }
 
   if (items.length === 0) {
     return (

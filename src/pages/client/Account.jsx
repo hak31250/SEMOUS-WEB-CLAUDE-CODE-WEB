@@ -2,23 +2,30 @@ import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { formatPrice, formatDate, orderStatusLabel, orderStatusColor } from '@/utils/format'
-import { User, LogOut, ShoppingBag, Loader2 } from 'lucide-react'
+import { User, LogOut, ShoppingBag, Loader2, Save, X, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useNavigate, Link } from 'react-router-dom'
+import { useSeo } from '@/hooks/useSeo'
 
 export default function Account() {
+  useSeo({ title: 'Mon compte', description: 'Gérez votre compte SEMOUS, consultez vos commandes et modifiez vos informations.' })
   const { user, profile, signIn, signUp, signOut, loading } = useAuthStore()
   const navigate = useNavigate()
   const [tab, setTab] = useState('login')
   const [orders, setOrders] = useState([])
   const [ordersLoading, setOrdersLoading] = useState(false)
+  const [editProfile, setEditProfile] = useState(false)
+  const [profileForm, setProfileForm] = useState({ prenom: '', nom: '', telephone: '' })
+  const [profileSaving, setProfileSaving] = useState(false)
 
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   const [signupForm, setSignupForm] = useState({ email: '', password: '', prenom: '', nom: '', telephone: '' })
   const [submitting, setSubmitting] = useState(false)
+  const [showPwd, setShowPwd] = useState(false)
 
   useEffect(() => {
     if (user) {
+      setProfileForm({ prenom: profile?.prenom || '', nom: profile?.nom || '', telephone: profile?.telephone || '' })
       setOrdersLoading(true)
       supabase
         .from('orders')
@@ -28,7 +35,7 @@ export default function Account() {
         .limit(20)
         .then(({ data }) => { setOrders(data || []); setOrdersLoading(false) })
     }
-  }, [user])
+  }, [user, profile])
 
   async function handleLogin(e) {
     e.preventDefault()
@@ -46,10 +53,26 @@ export default function Account() {
     setSubmitting(true)
     try {
       await signUp(signupForm)
-      toast.success('Compte créé ! Vérifiez votre email.')
+      toast.success('Compte créé ! Connectez-vous.')
+      setTab('login')
+      setLoginForm({ email: signupForm.email, password: signupForm.password })
     } catch (err) {
       toast.error(err.message || 'Erreur à la création du compte')
     } finally { setSubmitting(false) }
+  }
+
+  async function saveProfile() {
+    setProfileSaving(true)
+    const { error } = await supabase
+      .from('customer_profiles')
+      .update({ prenom: profileForm.prenom, nom: profileForm.nom, telephone: profileForm.telephone })
+      .eq('user_id', user.id)
+    setProfileSaving(false)
+    if (error) { toast.error('Erreur'); return }
+    // Update local store
+    useAuthStore.setState(s => ({ profile: { ...s.profile, ...profileForm } }))
+    toast.success('Profil mis à jour')
+    setEditProfile(false)
   }
 
   async function handleSignOut() {
@@ -64,24 +87,57 @@ export default function Account() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="section-title">Mon compte</h1>
-            <p className="text-sm text-semous-gray-text mt-1">{user.email}</p>
-          </div>
+          <h1 className="section-title">Mon compte</h1>
           <button onClick={handleSignOut} className="btn-secondary flex items-center gap-2 text-sm">
             <LogOut size={14} />Déconnexion
           </button>
         </div>
 
         {/* Profile card */}
-        <div className="card p-5 mb-8 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-semous-black text-white flex items-center justify-center font-bold text-lg">
-            {profile?.prenom?.[0] || user.email[0].toUpperCase()}
-          </div>
-          <div>
-            <p className="font-semibold">{profile?.prenom} {profile?.nom}</p>
-            <p className="text-sm text-semous-gray-text">{profile?.telephone}</p>
-          </div>
+        <div className="card p-5 mb-8">
+          {editProfile ? (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between mb-1">
+                <p className="font-semibold">Modifier mon profil</p>
+                <button onClick={() => setEditProfile(false)}><X size={18} /></button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium mb-1 block">Prénom</label>
+                  <input className="input-field" value={profileForm.prenom} onChange={e => setProfileForm(f => ({ ...f, prenom: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium mb-1 block">Nom</label>
+                  <input className="input-field" value={profileForm.nom} onChange={e => setProfileForm(f => ({ ...f, nom: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium mb-1 block">Téléphone</label>
+                <input className="input-field" value={profileForm.telephone} onChange={e => setProfileForm(f => ({ ...f, telephone: e.target.value }))} placeholder="06 XX XX XX XX" />
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setEditProfile(false)} className="btn-secondary flex-1">Annuler</button>
+                <button onClick={saveProfile} disabled={profileSaving} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                  {profileSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  Sauvegarder
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-semous-black text-white flex items-center justify-center font-bold text-lg shrink-0">
+                {profile?.prenom?.[0] || user.email[0].toUpperCase()}
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold">{profile?.prenom || ''} {profile?.nom || ''}</p>
+                <p className="text-sm text-semous-gray-text">{user.email}</p>
+                {profile?.telephone && <p className="text-sm text-semous-gray-text">{profile.telephone}</p>}
+              </div>
+              <button onClick={() => setEditProfile(true)} className="text-xs text-semous-gray-text hover:text-semous-black underline">
+                Modifier
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Orders */}
@@ -99,19 +155,22 @@ export default function Account() {
         ) : (
           <div className="flex flex-col gap-4">
             {orders.map(order => (
-              <div key={order.id} className="card p-4">
-                <div className="flex items-center justify-between mb-3">
+              <Link key={order.id} to={`/commande/confirmation/${order.id}`} className="card p-4 block hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-2">
                   <p className="font-semibold text-sm">{order.numero}</p>
                   <span className={`badge ${orderStatusColor(order.statut)}`}>
                     {orderStatusLabel(order.statut)}
                   </span>
                 </div>
-                <div className="text-xs text-semous-gray-text mb-2">{formatDate(order.created_at)}</div>
-                <div className="text-sm flex justify-between font-medium">
-                  <span>{order.order_items?.length} article(s)</span>
-                  <span>{formatPrice(order.total_ttc)}</span>
+                <div className="text-xs text-semous-gray-text mb-2">{formatDate(order.created_at)} · <span className="capitalize">{order.type}</span></div>
+                <div className="text-sm flex justify-between">
+                  <span className="text-semous-gray-text">
+                    {order.order_items?.slice(0, 2).map(i => `${i.products?.nom}`).join(', ')}
+                    {(order.order_items?.length || 0) > 2 ? ` +${order.order_items.length - 2}` : ''}
+                  </span>
+                  <span className="font-bold">{formatPrice(order.total_ttc)}</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
@@ -128,12 +187,8 @@ export default function Account() {
 
       <div className="flex rounded-xl overflow-hidden border border-semous-gray-mid mb-6">
         {[{ key: 'login', label: 'Connexion' }, { key: 'signup', label: 'Créer un compte' }].map(t => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`flex-1 py-3 text-sm font-semibold transition-colors
-              ${tab === t.key ? 'bg-semous-black text-white' : 'text-semous-gray-text hover:text-semous-black'}`}
-          >
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`flex-1 py-3 text-sm font-semibold transition-colors ${tab === t.key ? 'bg-semous-black text-white' : 'text-semous-gray-text hover:text-semous-black'}`}>
             {t.label}
           </button>
         ))}
@@ -143,14 +198,21 @@ export default function Account() {
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <div>
             <label className="text-xs font-medium mb-1 block">Email</label>
-            <input required type="email" className="input-field" value={loginForm.email} onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))} placeholder="votre@email.com" />
+            <input required type="email" className="input-field" value={loginForm.email}
+              onChange={e => setLoginForm(f => ({ ...f, email: e.target.value }))} placeholder="votre@email.com" autoFocus />
           </div>
           <div>
             <label className="text-xs font-medium mb-1 block">Mot de passe</label>
-            <input required type="password" className="input-field" value={loginForm.password} onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))} placeholder="••••••••" />
+            <div className="relative">
+              <input required type={showPwd ? 'text' : 'password'} className="input-field pr-10" value={loginForm.password}
+                onChange={e => setLoginForm(f => ({ ...f, password: e.target.value }))} placeholder="••••••••" />
+              <button type="button" onClick={() => setShowPwd(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-semous-gray-text">
+                {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
           <button type="submit" disabled={submitting} className="btn-primary flex items-center justify-center gap-2">
-            {submitting ? <Loader2 size={16} className="animate-spin" /> : null}
+            {submitting ? <Loader2 size={16} className="animate-spin" /> : <User size={16} />}
             Se connecter
           </button>
         </form>
@@ -159,24 +221,34 @@ export default function Account() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium mb-1 block">Prénom *</label>
-              <input required className="input-field" value={signupForm.prenom} onChange={e => setSignupForm(f => ({ ...f, prenom: e.target.value }))} placeholder="Prénom" />
+              <input required className="input-field" value={signupForm.prenom}
+                onChange={e => setSignupForm(f => ({ ...f, prenom: e.target.value }))} placeholder="Prénom" autoFocus />
             </div>
             <div>
               <label className="text-xs font-medium mb-1 block">Nom</label>
-              <input className="input-field" value={signupForm.nom} onChange={e => setSignupForm(f => ({ ...f, nom: e.target.value }))} placeholder="Nom" />
+              <input className="input-field" value={signupForm.nom}
+                onChange={e => setSignupForm(f => ({ ...f, nom: e.target.value }))} placeholder="Nom" />
             </div>
           </div>
           <div>
             <label className="text-xs font-medium mb-1 block">Email *</label>
-            <input required type="email" className="input-field" value={signupForm.email} onChange={e => setSignupForm(f => ({ ...f, email: e.target.value }))} placeholder="votre@email.com" />
+            <input required type="email" className="input-field" value={signupForm.email}
+              onChange={e => setSignupForm(f => ({ ...f, email: e.target.value }))} placeholder="votre@email.com" />
           </div>
           <div>
             <label className="text-xs font-medium mb-1 block">Téléphone</label>
-            <input className="input-field" value={signupForm.telephone} onChange={e => setSignupForm(f => ({ ...f, telephone: e.target.value }))} placeholder="06 XX XX XX XX" />
+            <input className="input-field" value={signupForm.telephone}
+              onChange={e => setSignupForm(f => ({ ...f, telephone: e.target.value }))} placeholder="06 XX XX XX XX" />
           </div>
           <div>
             <label className="text-xs font-medium mb-1 block">Mot de passe *</label>
-            <input required type="password" minLength={8} className="input-field" value={signupForm.password} onChange={e => setSignupForm(f => ({ ...f, password: e.target.value }))} placeholder="8 caractères minimum" />
+            <div className="relative">
+              <input required type={showPwd ? 'text' : 'password'} minLength={8} className="input-field pr-10" value={signupForm.password}
+                onChange={e => setSignupForm(f => ({ ...f, password: e.target.value }))} placeholder="8 caractères minimum" />
+              <button type="button" onClick={() => setShowPwd(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-semous-gray-text">
+                {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
           <button type="submit" disabled={submitting} className="btn-primary flex items-center justify-center gap-2">
             {submitting ? <Loader2 size={16} className="animate-spin" /> : null}

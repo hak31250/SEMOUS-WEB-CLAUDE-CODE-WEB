@@ -37,6 +37,7 @@ import Companies from '@/pages/admin/Companies'
 import Payments from '@/pages/admin/Payments'
 import Codes from '@/pages/admin/Codes'
 import Content from '@/pages/admin/Content'
+import Statistics from '@/pages/admin/Statistics'
 import Support from '@/pages/admin/Support'
 import Roles from '@/pages/admin/Roles'
 import Settings from '@/pages/admin/Settings'
@@ -112,6 +113,7 @@ export default function App() {
           <Route path="/admin/entreprises" element={<Companies />} />
           <Route path="/admin/paiements" element={<Payments />} />
           <Route path="/admin/codes" element={<Codes />} />
+          <Route path="/admin/statistiques" element={<Statistics />} />
           <Route path="/admin/contenus" element={<Content />} />
           <Route path="/admin/support" element={<Support />} />
           <Route path="/admin/roles" element={<Roles />} />
