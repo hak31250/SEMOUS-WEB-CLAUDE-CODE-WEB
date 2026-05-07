@@ -1,5 +1,3 @@
-// Web Audio API beep — fallback when /sounds/notification.mp3 is absent
-// Generates a short pleasant double-beep in the browser without any file
 export function playNotificationBeep() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)()
@@ -24,6 +22,6 @@ export function playNotificationBeep() {
 
     setTimeout(() => ctx.close(), 500)
   } catch {
-    // Audio not available — silent fail
+    // Audio not available
   }
 }

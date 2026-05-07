@@ -13,13 +13,11 @@ export function useSeo({ title, description, keywords, ogImage } = {}) {
     setMeta('description', description || 'SEMOUS — Restaurant halal spécialisé dans les bols à la semoule à Toulouse. Commande en ligne, livraison à domicile.')
     setMeta('keywords', keywords || 'semoule, couscous, bowl, halal, toulouse, livraison, commande en ligne')
 
-    // Open Graph
     setMetaProperty('og:title', document.title)
     setMetaProperty('og:description', description || '')
     setMetaProperty('og:image', ogImage || '/og-image.jpg')
     setMetaProperty('og:type', 'website')
 
-    // Twitter Card
     setMetaName('twitter:card', 'summary_large_image')
     setMetaName('twitter:title', document.title)
     setMetaName('twitter:description', description || '')

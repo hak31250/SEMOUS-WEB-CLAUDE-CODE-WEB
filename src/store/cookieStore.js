@@ -5,9 +5,9 @@ export const useCookieStore = create(
   persist(
     (set) => ({
       shown: false,
-      accepted: null, // null = pas encore choisi, true = accepté, false = refusé
+      accepted: null,
       preferences: {
-        essential: true,   // toujours actif
+        essential: true,
         analytics: false,
         marketing: false,
       },
