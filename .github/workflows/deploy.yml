@@ -43,9 +43,12 @@ jobs:
 
       - name: Build
         env:
-          VITE_SUPABASE_URL: https://xbiirtewzzhcapuoxezt.supabase.co
-          VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiaWlydGV3enpoY2FwdW94ZXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODk1NjYsImV4cCI6MjA5MzY2NTU2Nn0.0K8w2ft5QcSYu3BSg42HsJt2Ov9l0KcTIo2WzbBxdrQ
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
 
       - name: Deploy to Netlify
-        run: npx netlify-cli deploy --dir dist --prod --site a80b9d9a-1959-41ce-a5bb-2c6927f14768 --auth nfp_iqWAmPsZL4AQu6qYi2MW34QhpCvkY7QEb91b
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: npx netlify-cli deploy --dir dist --prod --site $NETLIFY_SITE_ID --auth $NETLIFY_AUTH_TOKEN
