@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - claude/setup-web-project-8T55k
+  workflow_dispatch:
 
 jobs:
   test:
