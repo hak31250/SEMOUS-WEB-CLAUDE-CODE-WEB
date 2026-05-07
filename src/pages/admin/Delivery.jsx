@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { formatPrice, formatDate } from '@/utils/format'
-import { MapPin, Navigation, Package, CheckCircle, Loader2, Users } from 'lucide-react'
+import { MapPin, Navigation, Package, CheckCircle, Loader2, Users, Phone } from 'lucide-react'
 import { buildWazeUrl } from '@/utils/delivery'
 import toast from 'react-hot-toast'
 
@@ -59,7 +59,7 @@ export default function Delivery() {
   async function load() {
     const { data } = await supabase
       .from('orders')
-      .select('*, addresses(*)')
+      .select('*, addresses(*), customer_profiles(telephone), guest_customers(telephone)')
       .in('statut', ['prete', 'en_livraison'])
       .eq('type', 'livraison')
       .order('created_at')
@@ -173,6 +173,14 @@ function DeliveryCard({ order, onSetStatus }) {
             className="flex items-center gap-1.5 btn-secondary text-sm py-2"
           >
             <Navigation size={14} />Waze
+          </a>
+        )}
+        {(order.customer_profiles?.telephone || order.guest_customers?.telephone) && (
+          <a
+            href={`tel:${order.customer_profiles?.telephone || order.guest_customers?.telephone}`}
+            className="flex items-center gap-1.5 btn-secondary text-sm py-2"
+          >
+            <Phone size={14} />Appeler
           </a>
         )}
         {order.statut === 'prete' && (

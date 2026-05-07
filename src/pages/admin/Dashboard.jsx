@@ -114,6 +114,10 @@ export default function Dashboard() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <div className="flex gap-2">
+          <button onClick={() => audioRef.current?.play().catch(() => playNotificationBeep())}
+            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg border border-semous-gray-mid hover:bg-semous-gray">
+            <Volume2 size={14} />Tester
+          </button>
           <button onClick={toggleSonnerie}
             className={`flex items-center gap-2 text-sm px-3 py-2 rounded-lg border transition-colors ${soundEnabled ? 'bg-semous-black text-white border-semous-black' : 'border-semous-gray-mid text-semous-gray-text'}`}>
             {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}

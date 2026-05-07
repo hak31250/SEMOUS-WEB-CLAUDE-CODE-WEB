@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { formatPrice, formatDate, orderStatusLabel, orderStatusColor } from '@/utils/format'
-import { User, LogOut, ShoppingBag, Loader2, Save, X, Eye, EyeOff } from 'lucide-react'
+import { User, LogOut, ShoppingBag, Loader2, Save, X, Eye, EyeOff, Download, Trash2, Shield } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useNavigate, Link } from 'react-router-dom'
 import { useSeo } from '@/hooks/useSeo'
@@ -22,6 +22,10 @@ export default function Account() {
   const [signupForm, setSignupForm] = useState({ email: '', password: '', prenom: '', nom: '', telephone: '' })
   const [submitting, setSubmitting] = useState(false)
   const [showPwd, setShowPwd] = useState(false)
+  const [downloadingData, setDownloadingData] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteSent, setDeleteSent] = useState(false)
+  const [deletingAccount, setDeletingAccount] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -79,6 +83,51 @@ export default function Account() {
     await signOut()
     toast.success('Déconnexion réussie')
     navigate('/')
+  }
+
+  async function handleDownloadData() {
+    setDownloadingData(true)
+    try {
+      const [profileRes, addressesRes, ordersRes] = await Promise.all([
+        supabase.from('customer_profiles').select('*').eq('user_id', user.id).single(),
+        supabase.from('addresses').select('*').eq('user_id', user.id),
+        supabase.from('orders').select('numero, statut, total_ttc, created_at').eq('user_id', user.id).order('created_at', { ascending: false }),
+      ])
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        compte: { email: user.email, createdAt: user.created_at },
+        profil: profileRes.data || null,
+        adresses: addressesRes.data || [],
+        commandes: ordersRes.data || [],
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `semous-mes-donnees-${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Données téléchargées')
+    } catch {
+      toast.error('Erreur lors de l\'export')
+    } finally {
+      setDownloadingData(false)
+    }
+  }
+
+  async function handleRequestDeletion() {
+    setDeletingAccount(true)
+    const { error } = await supabase
+      .from('customer_profiles')
+      .update({ suppression_demandee: true, suppression_date: new Date() })
+      .eq('user_id', user.id)
+    setDeletingAccount(false)
+    if (error) {
+      toast.error('Erreur lors de la demande')
+      return
+    }
+    setShowDeleteModal(false)
+    setDeleteSent(true)
   }
 
   if (loading) return <div className="flex items-center justify-center min-h-64"><Loader2 size={28} className="animate-spin" /></div>
@@ -172,6 +221,67 @@ export default function Account() {
                 </div>
               </Link>
             ))}
+          </div>
+        )}
+
+        {/* RGPD section */}
+        <div className="mt-10">
+          <h2 className="font-bold text-lg mb-4 flex items-center gap-2">
+            <Shield size={18} />Vos droits RGPD
+          </h2>
+          <div className="card p-5 mb-4">
+            <p className="text-sm text-semous-gray-text mb-4">
+              Conformément au RGPD, vous disposez d&apos;un droit d&apos;accès, de rectification, de portabilité et d&apos;effacement de vos données personnelles. Vous pouvez exercer ces droits directement depuis cette page ou en nous contactant à <a href="mailto:contact@semous.fr" className="underline">contact@semous.fr</a>.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleDownloadData}
+                disabled={downloadingData}
+                className="btn-secondary flex items-center justify-center gap-2 text-sm flex-1"
+              >
+                {downloadingData ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                Télécharger mes données
+              </button>
+              {deleteSent ? (
+                <div className="flex-1 text-center text-sm text-semous-gray-text bg-semous-gray rounded-xl px-4 py-2 flex items-center justify-center">
+                  Demande envoyée. Traitement sous 30 jours.
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="btn-secondary flex items-center justify-center gap-2 text-sm flex-1 text-red-600 border-red-200 hover:border-red-400"
+                >
+                  <Trash2 size={14} />
+                  Supprimer mon compte
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Delete account confirmation modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+            <div className="card p-6 max-w-sm w-full">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold">Supprimer mon compte</h3>
+                <button onClick={() => setShowDeleteModal(false)}><X size={18} /></button>
+              </div>
+              <p className="text-sm text-semous-gray-text mb-5">
+                Vous êtes sur le point de demander la suppression de votre compte et de toutes vos données personnelles. Cette demande sera traitée sous <strong>30 jours</strong>. Vous pouvez continuer à utiliser votre compte pendant ce délai.
+              </p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowDeleteModal(false)} className="btn-secondary flex-1">Annuler</button>
+                <button
+                  onClick={handleRequestDeletion}
+                  disabled={deletingAccount}
+                  className="flex-1 bg-red-600 text-white rounded-xl py-2.5 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-red-700 transition-colors disabled:opacity-60"
+                >
+                  {deletingAccount ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                  Confirmer
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

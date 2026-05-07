@@ -17,6 +17,7 @@ import Enterprise from '@/pages/client/Enterprise'
 import SemousClub from '@/pages/client/SemousClub'
 import FAQ from '@/pages/client/FAQ'
 import Contact from '@/pages/client/Contact'
+import OrderTracking from '@/pages/client/OrderTracking'
 
 // Legal pages
 import MentionsLegales from '@/pages/legal/MentionsLegales'
@@ -94,6 +95,8 @@ export default function App() {
           <Route path="/semous-club" element={<SemousClub />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/suivi" element={<OrderTracking />} />
+          <Route path="/suivi/:numero" element={<OrderTracking />} />
           <Route path="/legal/mentions-legales" element={<MentionsLegales />} />
           <Route path="/legal/cgv" element={<CGV />} />
           <Route path="/legal/confidentialite" element={<Confidentialite />} />
