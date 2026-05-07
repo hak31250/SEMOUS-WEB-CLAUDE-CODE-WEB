@@ -82,7 +82,7 @@ export default function App() {
   useEffect(() => { init() }, [init])
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <Routes>
         {/* Client routes */}
         <Route element={<ClientLayout />}>
