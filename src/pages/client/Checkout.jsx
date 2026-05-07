@@ -58,6 +58,16 @@ export default function Checkout() {
     if (code.date_debut && new Date(code.date_debut) > now) { toast.error('Ce code n\'est pas encore actif'); return }
     if (code.date_fin && new Date(code.date_fin) < now) { toast.error('Ce code est expiré'); return }
     if (code.limite_total && code.usage_count >= code.limite_total) { toast.error('Ce code a atteint sa limite'); return }
+    if (code.limite_par_client && code.limite_par_client > 0) {
+      const identifier = user?.id ? { user_id: user.id } : form.email ? { guest_email: form.email } : null
+      if (identifier) {
+        const col = identifier.user_id ? 'user_id' : 'guest_email'
+        const val = identifier.user_id || identifier.guest_email
+        const { count } = await supabase.from('code_usages').select('id', { count: 'exact', head: true })
+          .eq('code_id', code.id).eq(col, val)
+        if (count >= code.limite_par_client) { toast.error(`Ce code est limité à ${code.limite_par_client} utilisation(s) par client`); return }
+      }
+    }
     let redAmount = 0
     if (code.type === 'reduction_eur') redAmount = code.valeur
     if (code.type === 'reduction_pct') redAmount = (sousTotal * code.valeur) / 100

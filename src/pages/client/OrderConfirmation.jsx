@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { formatPrice, formatDate } from '@/utils/format'
-import { CheckCircle, Clock, Loader2, ChefHat, Truck, Package, AlertCircle } from 'lucide-react'
+import { CheckCircle, Clock, Loader2, ChefHat, Truck, Package, AlertCircle, Timer } from 'lucide-react'
 import { useSeo } from '@/hooks/useSeo'
+import { getDeliveryTime } from '@/utils/delivery'
 
 const STATUS_STEPS = [
   { key: 'en_attente_validation', label: 'Reçue', icon: Package, desc: 'Votre commande est bien reçue.' },
@@ -154,6 +155,14 @@ export default function OrderConfirmation() {
           </div>
         </div>
       </div>
+
+      {/* Delivery time estimate */}
+      {isDelivery && order.zone_km != null && getDeliveryTime(order.zone_km) && (
+        <div className="flex items-center gap-2 text-sm font-medium bg-semous-gray rounded-xl px-4 py-3 mb-4">
+          <Timer size={16} className="text-semous-black shrink-0" />
+          <span>Temps de livraison estimé : <strong>{getDeliveryTime(order.zone_km)}</strong></span>
+        </div>
+      )}
 
       <div className="flex items-center gap-2 text-xs text-semous-gray-text mb-8">
         <Clock size={12} />
