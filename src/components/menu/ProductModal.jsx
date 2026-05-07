@@ -46,7 +46,6 @@ export default function ProductModal({ product, open, onClose }) {
           className="bg-white w-full max-w-lg rounded-t-2xl md:rounded-2xl max-h-[90vh] overflow-y-auto"
           onClick={e => e.stopPropagation()}
         >
-          {/* Image */}
           {product.photo_url ? (
             <div className="relative">
               <img src={product.photo_url} alt={product.nom} className="w-full h-52 object-cover rounded-t-2xl md:rounded-t-2xl" />
@@ -67,11 +66,10 @@ export default function ProductModal({ product, open, onClose }) {
             )}
             {product.allergenes?.length > 0 && (
               <p className="text-xs text-orange-600 mb-4">
-                Allergènes : {product.allergenes.join(', ')}
+                Allergènes : {product.allergenes.join(', ')}
               </p>
             )}
 
-            {/* Options */}
             {Object.entries(optionsByType).map(([type, opts]) => (
               <div key={type} className="mb-4">
                 <p className="font-semibold text-sm mb-2">{typeLabels[type] || type}</p>
@@ -97,7 +95,6 @@ export default function ProductModal({ product, open, onClose }) {
               </div>
             ))}
 
-            {/* Quantity + Add */}
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-semous-gray-mid">
               <div className="flex items-center gap-3">
                 <button

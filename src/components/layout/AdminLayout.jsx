@@ -42,7 +42,6 @@ export default function AdminLayout({ children }) {
   const isActive = (item) =>
     item.exact ? location.pathname === item.to : location.pathname.startsWith(item.to)
 
-  // Cuisine et Livreur voient un menu réduit
   const visibleItems = navItems.filter(item => {
     if (role === 'cuisine') return ['/admin', '/admin/cuisine', '/admin/commandes'].includes(item.to)
     if (role === 'livreur') return ['/admin', '/admin/livraison'].includes(item.to)
@@ -51,12 +50,10 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-semous-gray flex">
-      {/* Overlay mobile */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside className={`
         fixed md:sticky top-0 h-screen z-40 w-64 bg-semous-black text-white flex flex-col
         transition-transform duration-300 md:translate-x-0
@@ -94,7 +91,6 @@ export default function AdminLayout({ children }) {
         </div>
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         <header className="bg-white border-b border-semous-gray-mid px-4 h-14 flex items-center sticky top-0 z-20">
           <button className="md:hidden text-semous-black mr-3" onClick={() => setSidebarOpen(true)}>

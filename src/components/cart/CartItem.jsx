@@ -16,7 +16,6 @@ export default function CartItem({ item }) {
 
   return (
     <div className="flex gap-3 py-3 border-b border-semous-gray-mid last:border-0">
-      {/* Photo */}
       {item.product.photo_url ? (
         <img
           src={item.product.photo_url}
@@ -29,14 +28,12 @@ export default function CartItem({ item }) {
         </div>
       )}
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm truncate">{item.product.nom}</p>
         {optionsLabel && (
           <p className="text-xs text-semous-gray-text mt-0.5">{optionsLabel}</p>
         )}
         <div className="flex items-center justify-between mt-2">
-          {/* Quantity */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => updateQuantity(item.key, item.quantity - 1)}

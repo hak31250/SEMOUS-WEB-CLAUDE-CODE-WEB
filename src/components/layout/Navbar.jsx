@@ -33,7 +33,6 @@ export default function Navbar() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="font-bold text-xl tracking-tight text-semous-black">SEMOUS</Link>
 
-          {/* Desktop links */}
           <div className="hidden md:flex items-center gap-6">
             {links.map(l => (
               <Link key={l.to} to={l.to}
@@ -43,7 +42,6 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-3">
             {user ? (
               <div className="hidden md:flex items-center gap-2">
@@ -77,7 +75,6 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden border-t border-semous-gray-mid bg-white px-4 py-3 flex flex-col gap-1">
             {links.map(l => (

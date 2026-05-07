@@ -30,7 +30,6 @@ export default function CookieBanner() {
             <Link to="/legal/cookies" className="underline">En savoir plus</Link>
           </p>
 
-          {/* Détails */}
           <button
             onClick={() => setExpanded(e => !e)}
             className="text-xs text-semous-black font-medium flex items-center gap-1 mb-3 hover:opacity-70"

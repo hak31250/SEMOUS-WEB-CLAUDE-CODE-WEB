@@ -6,7 +6,6 @@ export default function Footer() {
     <footer className="bg-semous-black text-white mt-16">
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Brand */}
           <div>
             <p className="font-bold text-xl mb-2">SEMOUS</p>
             <p className="text-sm text-gray-400">
@@ -15,11 +14,10 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Contact */}
           <div>
             <p className="font-semibold mb-3 text-sm uppercase tracking-wider">Contact</p>
             <div className="flex flex-col gap-2 text-sm text-gray-400">
-              <a href="https://maps.google.com/?q=32+avenue+Honoré+Serres+Toulouse" className="flex items-start gap-2 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
+              <a href="https://maps.google.com/?q=32+avenue+Honor%C3%A9+Serres+Toulouse" className="flex items-start gap-2 hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">
                 <MapPin size={14} className="mt-0.5 shrink-0" />
                 32 av. Honoré Serres, 31000 Toulouse
               </a>
@@ -30,14 +28,13 @@ export default function Footer() {
               <div className="flex items-start gap-2">
                 <Clock size={14} className="mt-0.5 shrink-0" />
                 <div>
-                  <p>Lun–Jeu &amp; Dim : 19h00–00h00</p>
-                  <p>Ven–Sam : 19h00–02h00</p>
+                  <p>Lun–Jeu &amp; Dim : 19h00–00h00</p>
+                  <p>Ven–Sam : 19h00–02h00</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Links */}
           <div>
             <p className="font-semibold mb-3 text-sm uppercase tracking-wider">Informations</p>
             <div className="flex flex-col gap-2 text-sm text-gray-400">

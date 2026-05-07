@@ -23,7 +23,6 @@ export default function ProductCard({ product }) {
   return (
     <>
       <div className="card overflow-hidden group cursor-pointer hover:shadow-md transition-shadow" onClick={() => setModalOpen(true)}>
-        {/* Image */}
         <div className="relative">
           {product.photo_url ? (
             <img
@@ -43,7 +42,6 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        {/* Info */}
         <div className="p-4">
           <h3 className="font-semibold text-sm mb-1">{product.nom}</h3>
           {product.description && (

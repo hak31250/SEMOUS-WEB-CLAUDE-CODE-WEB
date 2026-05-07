@@ -65,7 +65,7 @@ export default function CartDrawer({ open, onClose }) {
 
             {mode === 'livraison' && !isDeliveryEligible && (
               <p className="text-xs text-orange-600 bg-orange-50 rounded-lg px-3 py-2">
-                Minimum livraison : {formatPrice(LIVRAISON_MINIMUM)}.
+                Minimum livraison : {formatPrice(LIVRAISON_MINIMUM)}.
                 Il manque {formatPrice(LIVRAISON_MINIMUM - sousTotal)}.
               </p>
             )}

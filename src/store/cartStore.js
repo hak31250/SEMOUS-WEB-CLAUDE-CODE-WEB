@@ -61,7 +61,8 @@ export const useCartStore = create(
 
       updateQuantity: (key, quantity) => {
         if (quantity <= 0) { get().removeItem(key); return }
-        set(state => ({ items: state.items.map(i => i.key === key ? { ...i, quantity } : i) }))
+        set(state => ({ items: state.items.map(i => i.key === key ? { ...i, quantity } : i) })
+        )
       },
 
       clearCart: () => set({ items: [], codePromo: null, reduction: 0 }),
