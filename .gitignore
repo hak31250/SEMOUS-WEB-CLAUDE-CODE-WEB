@@ -31,6 +31,9 @@ dist-ssr
 *.sln
 *.sw?
 
+# Netlify local state
+.netlify/
+
 # Extracted ZIP (artefact temporaire)
 extracted/
 *.zip
