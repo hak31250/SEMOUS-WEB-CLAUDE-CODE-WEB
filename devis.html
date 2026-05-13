@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pré-devis — Eco'Clean</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; }
+      @page { margin: 15mm; size: A4; }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <div class="no-print fixed top-4 right-4 z-10">
+    <button onclick="window.print()" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold shadow-lg text-white" style="background:#16532d">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+      Sauvegarder en PDF
+    </button>
+  </div>
+
+  <div id="loading" class="flex items-center justify-center h-screen">
+    <div class="text-center">
+      <div style="width:32px;height:32px;border:3px solid #c3e6cb;border-top-color:#16532d;border-radius:50%;animation:spin .6s linear infinite;margin:0 auto 12px"></div>
+      <p class="text-gray-500 text-sm">Chargement du pré-devis...</p>
+    </div>
+  </div>
+
+  <div id="errorView" class="flex items-center justify-center h-screen hidden">
+    <div class="text-center">
+      <p class="text-red-500 font-semibold">Demande introuvable</p>
+      <p class="text-gray-400 text-sm mt-1">Vérifiez l'identifiant dans l'URL.</p>
+      <a href="admin.html" class="no-print inline-block mt-4 text-sm underline" style="color:#16532d">← Retour à l'admin</a>
+    </div>
+  </div>
+
+  <div id="devisContent" class="hidden">
+    <div class="max-w-2xl mx-auto p-8 bg-white min-h-screen">
+
+      <div class="flex items-center justify-between mb-8 pb-6" style="border-bottom:2px solid #16532d">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style="background:#16532d">🌿</div>
+          <div>
+            <h1 class="text-xl font-bold" style="color:#0d3a1f">Mr &amp; Mrs Eco'Clean</h1>
+            <p class="text-xs text-gray-500">Nettoyage professionnel — Toulouse</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-lg font-bold text-gray-800">PRÉ-DEVIS</p>
+          <p class="text-sm font-bold" id="devisRef" style="color:#16532d"></p>
+          <p class="text-xs text-gray-500" id="devisDate"></p>
+        </div>
+      </div>
+
+      <div class="rounded-lg px-4 py-2 mb-6 text-xs" style="background:#fff7ed;border:1px solid #fed7aa;color:#c2410c">
+        <strong>Estimation indicative</strong> — Prix indicatif sous réserve de vérification des informations transmises et de l'état réel du logement.
+      </div>
+
+      <div id="prixBlock"></div>
+
+      <div class="grid grid-cols-2 gap-6 mb-6">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wide mb-2" style="color:#16532d">Agence</p>
+          <table class="w-full" id="agenceTable"></table>
+        </div>
+        <div>
+          <p class="text-xs font-bold uppercase tracking-wide mb-2" style="color:#16532d">Payeur / Facturation</p>
+          <table class="w-full" id="payeurTable"></table>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <p class="text-xs font-bold uppercase tracking-wide mb-2" style="color:#16532d">Chantier</p>
+        <table class="w-full" id="chantierTable"></table>
+      </div>
+
+      <div id="detailBlock" class="mb-6 hidden">
+        <p class="text-xs font-bold uppercase tracking-wide mb-2" style="color:#16532d">Détail du calcul</p>
+        <table class="w-full" style="border:1px solid #e2e8e2;border-radius:8px;overflow:hidden">
+          <thead style="background:#e8f5ec">
+            <tr>
+              <th class="text-left px-3 py-2 text-xs font-semibold" style="color:#16532d">Prestation</th>
+              <th class="text-right px-3 py-2 text-xs font-semibold" style="color:#16532d">Montant HT</th>
+            </tr>
+          </thead>
+          <tbody id="detailRows" style="border-top:1px solid #e2e8e2"></tbody>
+          <tfoot style="background:#e8f5ec" id="detailFoot"></tfoot>
+        </table>
+      </div>
+
+      <div class="pt-4 text-xs text-gray-500 space-y-1" style="border-top:1px solid #e2e8e2">
+        <p id="validiteText"></p>
+        <p>Ce pré-devis est indicatif et doit être validé par Eco'Clean avant tout engagement.</p>
+        <p>La facturation finale sera établie via Propret après validation de l'intervention.</p>
+      </div>
+
+      <div class="no-print mt-8 pt-4" style="border-top:1px solid #e2e8e2">
+        <a href="admin.html" class="text-sm underline" style="color:#16532d">← Retour à l'espace admin</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const SUPA_URL='https://xbiirtewzzhcapuoxezt.supabase.co'
+  const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiaWlydGV3enpoY2FwdW94ZXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODk1NjYsImV4cCI6MjA5MzY2NTU2Nn0.0K8w2ft5QcSYu3BSg42HsJt2Ov9l0KcTIo2WzbBxdrQ'
+  const db=supabase.createClient(SUPA_URL,SUPA_KEY)
+  const TYPE_LABELS={locataire_sortant:'État des lieux sortant',bailleur_entrant:'Préparation entrée',simple:'Nettoyage simple',avant_vente:'Avant vente',avant_location:'Avant location',apres_depart:'Après départ',remise_en_etat:'Remise en état',apres_travaux:'Après travaux',tres_sale:'Très sale',sinistre:'Après sinistre',insalubre:'Insalubre',urgent:'Urgent'}
+
+  function row(label,value){
+    if(!value) return ''
+    return `<tr style="border-bottom:1px solid #f3f4f6"><td style="padding:4px 0;color:#6b7a6b;font-size:12px;width:160px">${label}</td><td style="padding:4px 0;font-size:12px;font-weight:600;color:#1a2e1a">${value}</td></tr>`
+  }
+  function drow(label,value,bg){
+    return `<tr style="${bg?'background:#f9fafb':''}"><td style="padding:6px 12px;font-size:13px">${label}</td><td style="padding:6px 12px;font-size:13px;text-align:right">${value}</td></tr>`
+  }
+
+  async function load(){
+    const params=new URLSearchParams(window.location.search)
+    const id=params.get('id')
+    if(!id){showErr();return}
+    const {data}=await db.schema('ecoclean').from('demandes').select('*').eq('id',id).single()
+    if(!data){showErr();return}
+    await db.schema('ecoclean').from('demandes').update({statut:'pre_devis_genere',updated_at:new Date().toISOString()}).eq('id',id)
+    render(data)
+  }
+
+  function showErr(){
+    document.getElementById('loading').classList.add('hidden')
+    document.getElementById('errorView').classList.remove('hidden')
+  }
+
+  function render(d){
+    document.getElementById('loading').classList.add('hidden')
+    document.getElementById('devisContent').classList.remove('hidden')
+    document.title=`Pré-devis ${d.id} — Eco'Clean`
+    const today=new Date().toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric'})
+    const validity=new Date(Date.now()+30*24*60*60*1000).toLocaleDateString('fr-FR')
+    document.getElementById('devisRef').textContent=d.id
+    document.getElementById('devisDate').textContent=`Établi le ${today}`
+    document.getElementById('validiteText').innerHTML=`<strong>Validité du devis :</strong> 30 jours — jusqu'au ${validity}`
+
+    const prixBlock=document.getElementById('prixBlock')
+    if(d.sur_devis){
+      prixBlock.innerHTML=`<div class="rounded-xl p-6 text-center mb-6" style="background:#f9fafb;border:1px solid #e2e8e2"><p class="text-lg font-bold text-gray-700 mb-1">Demande sur devis manuel</p><p class="text-sm text-gray-500">Eco'Clean vous contactera sous 48h.</p></div>`
+    } else {
+      prixBlock.innerHTML=`<div class="rounded-xl p-5 mb-6 text-center" style="background:#e8f5ec;border:1px solid #c3e6cb"><p class="text-xs font-semibold uppercase tracking-wide mb-2" style="color:#16532d">Estimation totale</p><p class="text-4xl font-bold" style="color:#0d3a1f">${d.estimation_ttc} €<span class="text-lg font-normal"> TTC</span></p><p class="text-sm text-gray-500 mt-1">${d.estimation_ht} € HT + TVA ${d.taux_tva||10}% (${d.estimation_tva} €)</p></div>`
+    }
+
+    document.getElementById('agenceTable').innerHTML=`<tbody>${row('Agence',d.nom_agence)}${row('Gestionnaire',d.gestionnaire)}${row('Téléphone',d.telephone)}${row('Email',d.email)}</tbody>`
+    document.getElementById('payeurTable').innerHTML=`<tbody>${row('Payeur',d.nom_payeur)}${row('Email',d.email_facturation)}${row('Adresse',d.adresse_facturation)}</tbody>`
+
+    const iv=(d.type_intervention||'').split(',').map(i=>TYPE_LABELS[i.trim()]||i.trim()).filter(Boolean).join(', ')
+    document.getElementById('chantierTable').innerHTML=`<tbody>${row('Adresse',`${d.adresse_chantier}, ${d.code_postal} ${d.ville}`)}${row('Type de bien',`${d.type_bien} — ${d.surface} m²`)}${row('Intervention',iv)}${row('Accès clés',d.acces_cles)}${d.etage_sans_asc?row('Étage sans asc.','Supplément +15 €'):''}${d.stationnement_difficile?row('Stationnement','Supplément +10 €'):''}</tbody>`
+
+    if(!d.sur_devis&&d.detail_calcul){
+      const dc=d.detail_calcul
+      const rows=[]
+      if(dc.basePrice>0) rows.push(drow(`Base surface (${d.surface} m²)`,`${dc.basePrice} €`))
+      if(dc.cuisinePrice>0) rows.push(drow(`Cuisine (${d.niveau_cuisine})`,`${dc.cuisinePrice} €`))
+      if(dc.sdbPrice>0) rows.push(drow(`Salle de bain`,`${dc.sdbPrice} €`))
+      if(dc.solsPrice>0) rows.push(drow(`Sols`,`${dc.solsPrice} €`))
+      if(dc.vitresPrice>0) rows.push(drow(`Vitres`,`${dc.vitresPrice} €`))
+      if(dc.zonesPrice>0) rows.push(drow(`Zones supplémentaires`,`${dc.zonesPrice} €`))
+      if(dc.specialesPrice>0) rows.push(drow(`Prestations spéciales`,`${dc.specialesPrice} €`))
+      if(dc.coef>1) rows.push(drow(`Coefficient (×${dc.coef})`,'inclus',true))
+      if(dc.urgentCoef>1) rows.push(drow(`Urgence (×${dc.urgentCoef})`,'inclus',true))
+      if(dc.statFee>0) rows.push(drow('Stationnement',`+${dc.statFee} €`))
+      if(dc.etageFee>0) rows.push(drow('Étage sans asc.',`+${dc.etageFee} €`))
+      document.getElementById('detailRows').innerHTML=rows.join('')
+      document.getElementById('detailFoot').innerHTML=`<tr><td style="padding:8px 12px;font-weight:700;color:#0d3a1f">Total HT</td><td style="padding:8px 12px;font-weight:700;color:#0d3a1f;text-align:right">${d.estimation_ht} €</td></tr><tr><td style="padding:4px 12px;font-size:12px;color:#6b7a6b">TVA ${d.taux_tva||10}%</td><td style="padding:4px 12px;font-size:12px;color:#6b7a6b;text-align:right">${d.estimation_tva} €</td></tr><tr style="border-top:1px solid #c3e6cb"><td style="padding:8px 12px;font-weight:700;font-size:15px;color:#0d3a1f">Total TTC</td><td style="padding:8px 12px;font-weight:700;font-size:15px;color:#0d3a1f;text-align:right">${d.estimation_ttc} €</td></tr>`
+      document.getElementById('detailBlock').classList.remove('hidden')
+    }
+  }
+
+  load()
+  </script>
+</body>
+</html>

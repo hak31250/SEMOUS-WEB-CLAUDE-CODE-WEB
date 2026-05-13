@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eco'Clean Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'eco-green': { DEFAULT: '#16532d', dark: '#0d3a1f', light: '#1e7040', pale: '#e8f5ec', border: '#c3e6cb' },
+            'eco-dark': '#1a2e1a',
+            'eco-gray': { DEFAULT: '#f5f7f5', mid: '#e2e8e2', text: '#6b7a6b' }
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; border: none; }
+    .btn-primary { background: #16532d; color: #fff; }
+    .btn-primary:hover { background: #0d3a1f; }
+    .btn-secondary { background: #e8f5ec; color: #16532d; border: 1px solid #c3e6cb; }
+    .btn-secondary:hover { background: #c3e6cb; }
+    .btn-ghost { background: #f5f7f5; color: #6b7a6b; border: 1px solid #e2e8e2; }
+    .btn-ghost:hover { background: #e2e8e2; }
+    .input { border: 1px solid #e2e8e2; border-radius: 8px; padding: 6px 10px; font-size: 13px; width: 100%; outline: none; }
+    .input:focus { border-color: #16532d; box-shadow: 0 0 0 2px #e8f5ec; }
+    select.input { cursor: pointer; }
+    .card { background: #fff; border: 1px solid #e2e8e2; border-radius: 12px; }
+    .sidebar { width: 220px; background: #0d3a1f; color: #fff; display: flex; flex-direction: column; min-height: 100vh; position: fixed; top: 0; left: 0; bottom: 0; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: rgba(255,255,255,0.75); text-decoration: none; transition: background .15s; }
+    .sidebar-nav a:hover { background: rgba(255,255,255,0.1); }
+    .sidebar-nav a.active { background: rgba(255,255,255,0.15); color: #fff; font-weight: 600; }
+    .main-content { margin-left: 220px; min-height: 100vh; background: #f5f7f5; }
+    @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+    .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal { background: #fff; border-radius: 16px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: currentColor; border-radius: 50%; animation: spin .6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .row-expanded { animation: slideDown .2s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast { padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); animation: fadeIn .3s ease; }
+    .toast.success { background: #16532d; }
+    .toast.error { background: #b91c1c; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    table { border-collapse: collapse; width: 100%; }
+    th { text-align: left; padding: 8px 12px; font-size: 12px; font-weight: 600; color: #6b7a6b; background: #f5f7f5; border-bottom: 1px solid #e2e8e2; }
+    td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+  </style>
+</head>
+<body>
+
+<div id="loginScreen" class="min-h-screen flex items-center justify-center p-4" style="background:linear-gradient(135deg,#e8f5ec,#fff);display:none!important">
+  <div class="card p-8 w-full max-w-sm">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background:#16532d">🌿</div>
+      <div>
+        <h1 class="font-bold" style="color:#1a2e1a">Eco'Clean Admin</h1>
+        <p class="text-xs" style="color:#6b7a6b">Espace de gestion</p>
+      </div>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold mb-1" style="color:#6b7a6b">Email</label>
+        <input id="loginEmail" type="email" class="input" placeholder="admin@ecoclean.fr" value="admin@ecoclean.fr" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold mb-1" style="color:#6b7a6b">Mot de passe</label>
+        <input id="loginPassword" type="password" class="input" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+      </div>
+      <div id="loginError" class="text-red-600 text-xs hidden">Email ou mot de passe incorrect.</div>
+      <button onclick="doLogin()" class="btn btn-primary w-full justify-center">Se connecter</button>
+    </div>
+  </div>
+</div>
+
+<div id="appScreen" style="display:none">
+  <aside class="sidebar">
+    <div class="p-4 border-b border-white/10">
+      <div class="flex items-center gap-2">
+        <span class="text-lg">🌿</span>
+        <span class="font-bold text-sm">Eco'Clean Admin</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav flex-1 p-3 space-y-1">
+      <a href="#" onclick="showTab('demandes')" id="nav-demandes" class="active">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Demandes
+      </a>
+      <a href="#" onclick="showTab('tarifs')" id="nav-tarifs">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+        Tarifs
+      </a>
+      <a href="index.html" target="_blank">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        Voir le formulaire
+      </a>
+    </nav>
+    <div class="p-3 border-t border-white/10 space-y-2">
+      <div class="bg-white/10 rounded-lg p-3 text-xs">
+        <p class="font-semibold text-white/90 mb-1">⚠️ Pont Propret V1</p>
+        <p class="text-white/60">Pas d'API Propret. Copier-coller via "Préparer Propret".</p>
+      </div>
+      <button onclick="doLogout()" class="flex items-center gap-2 w-full px-3 py-2 rounded-lg hover:bg-white/10 text-sm text-white/80 transition text-left">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Déconnexion
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-content flex flex-col">
+    <header class="bg-white border-b px-4 py-3 flex items-center justify-between gap-3 sticky top-0 z-10" style="border-color:#e2e8e2">
+      <div class="flex items-center gap-3">
+        <h1 id="pageTitle" class="font-semibold" style="color:#1a2e1a">Demandes</h1>
+        <span id="countBadge" class="badge hidden" style="background:#e8f5ec;color:#16532d">0</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <select id="filterStatut" class="input py-1.5 text-xs w-44" onchange="filterDemandes()">
+          <option value="all">Tous les statuts</option>
+          <option value="nouveau">Nouveau</option>
+          <option value="en_traitement">En traitement</option>
+          <option value="pre_devis_genere">Pré-devis généré</option>
+          <option value="valide">Validé</option>
+          <option value="annule">Annulé</option>
+          <option value="sur_devis">Sur devis</option>
+        </select>
+        <button onclick="loadDemandes()" id="refreshBtn" class="btn btn-secondary py-1.5 px-3 text-xs">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Actualiser
+        </button>
+      </div>
+    </header>
+
+    <div class="flex-1 p-4">
+      <div id="tab-demandes">
+        <div id="demandesLoading" class="flex items-center justify-center h-48" style="color:#6b7a6b">
+          <span class="spinner mr-2" style="border-color:#c3e6cb;border-top-color:#16532d;"></span> Chargement...
+        </div>
+        <div id="demandesEmpty" class="text-center py-16 hidden" style="color:#6b7a6b">
+          <p>Aucune demande trouvée</p>
+        </div>
+        <div id="demandesList" class="space-y-3 hidden"></div>
+      </div>
+      <div id="tab-tarifs" class="hidden">
+        <div id="tarifsLoading" class="flex items-center justify-center h-48" style="color:#6b7a6b">
+          <span class="spinner mr-2" style="border-color:#c3e6cb;border-top-color:#16532d;"></span> Chargement...
+        </div>
+        <div id="tarifsContent" class="space-y-6 hidden"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="propretModal" class="modal-bg hidden">
+  <div class="modal p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-bold text-lg" style="color:#1a2e1a">Fiche Propret — Copier-Coller</h2>
+      <button onclick="closePropret()" class="text-2xl leading-none" style="color:#6b7a6b">&times;</button>
+    </div>
+    <div class="rounded-lg p-3 mb-3 text-xs" style="background:#e8f5ec;border:1px solid #c3e6cb;color:#0d3a1f">
+      Copiez ce texte et collez-le dans Propret pour créer la fiche chantier.
+    </div>
+    <textarea id="propretText" class="w-full h-80 font-mono text-xs rounded-lg p-3 resize-none" style="border:1px solid #e2e8e2;background:#f9fafb" readonly></textarea>
+    <div class="flex gap-2 mt-4">
+      <button onclick="copyPropret()" class="btn btn-primary flex-1 justify-center">Tout copier</button>
+      <button onclick="closePropret()" class="btn btn-ghost">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const SUPA_URL = 'https://xbiirtewzzhcapuoxezt.supabase.co'
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiaWlydGV3enpoY2FwdW94ZXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODk1NjYsImV4cCI6MjA5MzY2NTU2Nn0.0K8w2ft5QcSYu3BSg42HsJt2Ov9l0KcTIo2WzbBxdrQ'
+const db = supabase.createClient(SUPA_URL, SUPA_KEY)
+let allDemandes = [], allTarifs = [], expandedId = null
+
+const STATUTS = {
+  nouveau:{label:'Nouveau',color:'blue'}, en_traitement:{label:'En traitement',color:'orange'},
+  pre_devis_genere:{label:'Pré-devis généré',color:'green'}, valide:{label:'Validé',color:'green'},
+  annule:{label:'Annulé',color:'red'}, sur_devis:{label:'Sur devis',color:'orange'},
+}
+const STATUT_BADGE = {
+  blue:'background:#dbeafe;color:#1d4ed8', orange:'background:#fed7aa;color:#c2410c',
+  red:'background:#fee2e2;color:#b91c1c', green:'background:#dcfce7;color:#15803d',
+  gray:'background:#f3f4f6;color:#4b5563',
+}
+const TYPE_LABELS = {
+  locataire_sortant:'État des lieux sortant', bailleur_entrant:'Préparation entrée',
+  simple:'Nettoyage simple', avant_vente:'Avant vente', avant_location:'Avant location',
+  apres_depart:'Après départ', remise_en_etat:'Remise en état', apres_travaux:'Après travaux',
+  tres_sale:'Très sale', sinistre:'Après sinistre', insalubre:'Insalubre', urgent:'Urgent',
+}
+const CAT_LABELS = {
+  surface:'Tarifs par surface', cuisine:'Options cuisine', sdb:'Options salle de bain',
+  sols:'Options sols', vitres:'Options vitres', zones:'Zones supplémentaires',
+  speciales:'Prestations spéciales', coefficients:'Coefficients', params:'Paramètres généraux',
+}
+
+function checkAuth() {
+  if (localStorage.getItem('ecoclean_admin')==='true') showApp()
+  else showLogin()
+}
+function showLogin() {
+  document.getElementById('loginScreen').style.display='flex'
+  document.getElementById('appScreen').style.display='none'
+}
+function showApp() {
+  document.getElementById('loginScreen').style.display='none'
+  document.getElementById('appScreen').style.display='block'
+  loadDemandes()
+}
+function doLogin() {
+  const email=document.getElementById('loginEmail').value.trim()
+  const pwd=document.getElementById('loginPassword').value
+  if (email==='admin@ecoclean.fr'&&pwd==='ecoclean2024') {
+    localStorage.setItem('ecoclean_admin','true')
+    document.getElementById('loginError').classList.add('hidden')
+    showApp()
+  } else { document.getElementById('loginError').classList.remove('hidden') }
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin() })
+function doLogout() { localStorage.removeItem('ecoclean_admin'); showLogin() }
+
+function showTab(tab) {
+  document.getElementById('tab-demandes').classList.toggle('hidden',tab!=='demandes')
+  document.getElementById('tab-tarifs').classList.toggle('hidden',tab!=='tarifs')
+  document.getElementById('nav-demandes').classList.toggle('active',tab==='demandes')
+  document.getElementById('nav-tarifs').classList.toggle('active',tab==='tarifs')
+  document.getElementById('pageTitle').textContent=tab==='demandes'?'Demandes':'Gestion des tarifs'
+  document.getElementById('filterStatut').classList.toggle('hidden',tab!=='demandes')
+  if(tab==='tarifs') loadTarifs()
+}
+
+function toast(msg,type='success') {
+  const c=document.getElementById('toastContainer')
+  const t=document.createElement('div')
+  t.className=`toast ${type}`; t.textContent=msg; c.appendChild(t)
+  setTimeout(()=>t.remove(),3000)
+}
+
+async function loadDemandes() {
+  const btn=document.getElementById('refreshBtn'); btn.disabled=true
+  document.getElementById('demandesLoading').classList.remove('hidden')
+  document.getElementById('demandesList').classList.add('hidden')
+  document.getElementById('demandesEmpty').classList.add('hidden')
+  const {data,error}=await db.schema('ecoclean').from('demandes').select('*').order('created_at',{ascending:false})
+  btn.disabled=false
+  document.getElementById('demandesLoading').classList.add('hidden')
+  if(error){toast('Erreur de chargement','error');return}
+  allDemandes=data||[]; renderDemandes()
+}
+
+function filterDemandes(){renderDemandes()}
+
+function renderDemandes(){
+  const filter=document.getElementById('filterStatut').value
+  const filtered=filter==='all'?allDemandes:allDemandes.filter(d=>d.statut===filter)
+  const badge=document.getElementById('countBadge')
+  badge.textContent=filtered.length; badge.classList.remove('hidden')
+  const list=document.getElementById('demandesList')
+  const empty=document.getElementById('demandesEmpty')
+  if(filtered.length===0){list.classList.add('hidden');empty.classList.remove('hidden');return}
+  empty.classList.add('hidden'); list.classList.remove('hidden')
+  list.innerHTML=filtered.map(d=>renderCard(d)).join('')
+}
+
+function statutBadge(statut){
+  const s=STATUTS[statut]||{label:statut,color:'gray'}
+  return `<span class="badge" style="${STATUT_BADGE[s.color]||STATUT_BADGE.gray}">${s.label}</span>`
+}
+
+function renderCard(d){
+  const iv=(d.type_intervention||'').split(',').map(i=>TYPE_LABELS[i.trim()]||i.trim()).filter(Boolean).join(', ')
+  const date=new Date(d.created_at).toLocaleDateString('fr-FR')
+  const isExp=expandedId===d.id
+  return `<div class="card overflow-hidden" id="card-${d.id}">
+    <div class="flex items-center gap-3 p-4 cursor-pointer select-none" style="hover:background:#f9fafb" onclick="toggleCard('${d.id}')">
+      <div class="flex-1 min-w-0">
+        <div class="flex flex-wrap items-center gap-2 mb-1">
+          <span class="font-bold text-sm" style="color:#16532d">${d.id}</span>
+          ${statutBadge(d.statut)}
+          ${d.sur_devis?'<span class="badge" style="background:#fed7aa;color:#c2410c">Sur devis</span>':''}
+        </div>
+        <p class="text-sm font-medium truncate" style="color:#1a2e1a">${d.nom_agence||'—'} — ${d.adresse_chantier||''}, ${d.ville||''}</p>
+        <p class="text-xs" style="color:#6b7a6b">${d.type_bien||'—'} · ${d.surface||'?'} m² · ${iv||'—'}</p>
+      </div>
+      <div class="text-right shrink-0">
+        ${d.sur_devis
+          ?'<p class="text-sm font-bold text-orange-600">Sur devis</p>'
+          :`<p class="text-sm font-bold" style="color:#1a2e1a">${d.prix_final_ht||d.estimation_ht||'—'} € HT</p>
+            <p class="text-xs" style="color:#6b7a6b">${d.estimation_ttc||'—'} € TTC</p>`}
+        <p class="text-xs mt-0.5" style="color:#6b7a6b">${date}</p>
+      </div>
+      <svg class="w-4 h-4 shrink-0 transition-transform ${isExp?'rotate-180':''}" style="color:#6b7a6b" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </div>
+    ${isExp?renderExpanded(d):''}
+  </div>`
+}
+
+function renderExpanded(d){
+  const statuts=Object.entries(STATUTS).map(([v,{label}])=>`<option value="${v}" ${d.statut===v?'selected':''}>${label}</option>`).join('')
+  return `<div class="border-t p-4 space-y-4 row-expanded" style="background:#f9fafb;border-color:#e2e8e2">
+    <div class="flex flex-wrap gap-2">
+      <select class="input py-1.5 text-xs w-52" onchange="updateStatut('${d.id}',this.value)">${statuts}</select>
+      <a href="devis.html?id=${d.id}" target="_blank" class="btn btn-secondary py-1.5 px-3 text-xs">Pré-devis PDF</a>
+      <button onclick="openPropret('${d.id}')" class="btn btn-primary py-1.5 px-3 text-xs">Préparer Propret</button>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="bg-white rounded-lg p-3" style="border:1px solid #e2e8e2">
+        <p class="text-xs font-semibold uppercase tracking-wide mb-2" style="color:#16532d">Agence</p>
+        ${ir('Agence',d.nom_agence)}${ir('Gestionnaire',d.gestionnaire)}${ir('Téléphone',d.telephone)}${ir('Email',d.email)}${ir('SIRET',d.siret)}
+      </div>
+      <div class="bg-white rounded-lg p-3" style="border:1px solid #e2e8e2">
+        <p class="text-xs font-semibold uppercase tracking-wide mb-2" style="color:#16532d">Chantier</p>
+        ${ir('Adresse',`${d.adresse_chantier||''}, ${d.code_postal||''} ${d.ville||''}`)}
+        ${ir('Type',`${d.type_bien||''} — ${d.surface||'?'} m²`)}
+        ${ir('Accès clés',d.acces_cles)}
+        ${d.etage_sans_asc?ir('Étage sans asc.','Oui (+15€)'):''}
+        ${d.stationnement_difficile?ir('Stationnement','Difficile (+10€)'):''}
+      </div>
+      <div class="bg-white rounded-lg p-3" style="border:1px solid #e2e8e2">
+        <p class="text-xs font-semibold uppercase tracking-wide mb-2" style="color:#16532d">Facturation</p>
+        ${ir('Payeur',d.nom_payeur)}${ir('Type',d.payeur)}${ir('Email fact.',d.email_facturation)}${ir('Adresse',d.adresse_facturation)}
+      </div>
+      <div class="bg-white rounded-lg p-3" style="border:1px solid #e2e8e2">
+        <p class="text-xs font-semibold uppercase tracking-wide mb-2" style="color:#16532d">Prestations</p>
+        ${ir('Cuisine',d.niveau_cuisine?`${d.niveau_cuisine} — ${(d.cuisine_options||[]).join(', ')||'—'}`:null)}
+        ${ir('SDB',d.niveau_sdb?`${d.niveau_sdb} — ${(d.sdb_options||[]).join(', ')||'—'}`:null)}
+        ${d.type_sol?ir('Sol',`${d.type_sol} — ${(d.etat_sol||[]).join(', ')}` ):''}
+        ${ir('Vitres',d.vitres_option)}
+        ${(d.zones_options||[]).length?ir('Zones',d.zones_options.join(', ')):''}
+        ${(d.speciales_options||[]).length?ir('Spéciales',d.speciales_options.join(', ')):''}
+        ${d.nb_photos?ir('Photos',`${d.nb_photos}`):''}
+      </div>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold mb-1" style="color:#6b7a6b">Commentaire interne</label>
+      <textarea class="input h-16 resize-none text-xs" placeholder="Notes internes..." onblur="updateCommentaire('${d.id}',this.value)">${d.commentaire_interne||''}</textarea>
+    </div>
+  </div>`
+}
+
+function ir(label,value){
+  if(!value) return ''
+  return `<div class="flex gap-2 text-xs mb-1"><span class="shrink-0" style="color:#6b7a6b">${label} :</span><span class="font-medium" style="color:#1a2e1a">${value}</span></div>`
+}
+
+function toggleCard(id){
+  expandedId=expandedId===id?null:id; renderDemandes()
+  if(expandedId) setTimeout(()=>{const el=document.getElementById(`card-${id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'})},50)
+}
+
+async function updateStatut(id,statut){
+  const {error}=await db.schema('ecoclean').from('demandes').update({statut,updated_at:new Date().toISOString()}).eq('id',id)
+  if(error){toast('Erreur','error');return}
+  allDemandes=allDemandes.map(d=>d.id===id?{...d,statut}:d); renderDemandes(); toast('Statut mis à jour')
+}
+
+async function updateCommentaire(id,commentaire_interne){
+  await db.schema('ecoclean').from('demandes').update({commentaire_interne,updated_at:new Date().toISOString()}).eq('id',id)
+  allDemandes=allDemandes.map(d=>d.id===id?{...d,commentaire_interne}:d)
+}
+
+function openPropret(id){
+  const d=allDemandes.find(x=>x.id===id); if(!d) return
+  const iv=(d.type_intervention||'').split(',').map(i=>TYPE_LABELS[i.trim()]||i.trim()).filter(Boolean).join(', ')
+  const lines=[
+    `=== FICHE PROPRET — Eco'Clean ===`, '',
+    `Référence : ${d.id}`, `Date : ${new Date(d.created_at).toLocaleDateString('fr-FR')}`, '',
+    '--- AGENCE ---',
+    `Agence : ${d.nom_agence||'—'}`, `Gestionnaire : ${d.gestionnaire||'—'}`,
+    `Téléphone : ${d.telephone||'—'}`, `Email : ${d.email||'—'}`,
+    d.siret?`SIRET : ${d.siret}`:null, '',
+    '--- CHANTIER ---',
+    `Adresse : ${d.adresse_chantier||'—'}, ${d.code_postal||''} ${d.ville||''}`,
+    `Type de bien : ${d.type_bien||'—'}`, `Surface : ${d.surface||'?'} m²`,
+    `Intervention : ${iv||'—'}`, `Accès clés : ${d.acces_cles||'—'}`,
+    d.etage_sans_asc?'Étage sans ascenseur : Oui (+15€)':null,
+    d.stationnement_difficile?'Stationnement difficile : Oui (+10€)':null, '',
+    '--- PRESTATIONS ---',
+    d.niveau_cuisine?`Cuisine : ${d.niveau_cuisine} — ${(d.cuisine_options||[]).join(', ')||'—'}`:null,
+    d.niveau_sdb?`SDB : ${d.niveau_sdb} — ${(d.sdb_options||[]).join(', ')||'—'}`:null,
+    d.type_sol?`Sol : ${d.type_sol} — ${(d.etat_sol||[]).join(', ')}`:null,
+    d.vitres_option?`Vitres : ${d.vitres_option}`:null,
+    (d.zones_options||[]).length?`Zones : ${d.zones_options.join(', ')}`:null,
+    (d.speciales_options||[]).length?`Spéciales : ${d.speciales_options.join(', ')}`:null, '',
+    '--- FACTURATION ---',
+    `Payeur : ${d.payeur||'—'} — ${d.nom_payeur||''}`,
+    d.adresse_facturation?`Adresse fact. : ${d.adresse_facturation}`:null,
+    d.email_facturation?`Email fact. : ${d.email_facturation}`:null, '',
+    '--- ESTIMATION ---',
+    d.sur_devis?'DEVIS MANUEL REQUIS':`Total HT : ${d.estimation_ht} €\nTVA ${d.taux_tva||10}% : ${d.estimation_tva} €\nTotal TTC : ${d.estimation_ttc} €`, '',
+    `Commentaire : ${d.commentaire_interne||'—'}`, '', '=== FIN DE FICHE ===',
+  ].filter(l=>l!==null).join('\n')
+  document.getElementById('propretText').value=lines
+  document.getElementById('propretModal').classList.remove('hidden')
+}
+function closePropret(){document.getElementById('propretModal').classList.add('hidden')}
+function copyPropret(){
+  navigator.clipboard.writeText(document.getElementById('propretText').value)
+    .then(()=>toast('Fiche copiée !'))
+    .catch(()=>{document.getElementById('propretText').select();document.execCommand('copy');toast('Copié !')})
+}
+
+async function loadTarifs(){
+  document.getElementById('tarifsLoading').classList.remove('hidden')
+  document.getElementById('tarifsContent').classList.add('hidden')
+  const {data}=await db.schema('ecoclean').from('tarifs').select('*').order('categorie').order('ordre')
+  allTarifs=data||[]
+  document.getElementById('tarifsLoading').classList.add('hidden')
+  document.getElementById('tarifsContent').classList.remove('hidden')
+  renderTarifs()
+}
+
+function renderTarifs(){
+  const grouped=Object.entries(CAT_LABELS).map(([cat,label])=>({cat,label,items:allTarifs.filter(t=>t.categorie===cat)})).filter(g=>g.items.length>0)
+  document.getElementById('tarifsContent').innerHTML=grouped.map(({cat,label,items})=>`
+    <div class="card overflow-hidden">
+      <div class="px-4 py-2.5 border-b" style="background:#e8f5ec;border-color:#c3e6cb">
+        <p class="text-sm font-semibold" style="color:#0d3a1f">${label}</p>
+      </div>
+      <table>
+        <thead><tr><th>Prestation</th><th style="width:120px">Valeur</th><th style="width:80px">Unité</th><th style="width:100px"></th></tr></thead>
+        <tbody>
+          ${items.map(t=>`
+            <tr id="row-${t.id}">
+              <td class="font-medium" style="color:#1a2e1a">${t.label}</td>
+              <td><input type="number" step="0.01" class="input py-1 px-2 text-xs" style="width:90px" value="${t.valeur}" id="val-${t.id}" onchange="markChanged('${t.id}','${t.valeur}')" onkeydown="if(event.key==='Enter')saveTarif('${t.id}')"/></td>
+              <td style="color:#6b7a6b">${t.unite||''}</td>
+              <td class="text-right" id="savecell-${t.id}"></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`).join('')
+}
+
+function markChanged(id,original){
+  const input=document.getElementById(`val-${id}`)
+  const cell=document.getElementById(`savecell-${id}`)
+  const row=document.getElementById(`row-${id}`)
+  if(input.value!==String(original)){
+    row.style.background='#fefce8'
+    cell.innerHTML=`<button onclick="saveTarif('${id}')" class="btn btn-primary py-1 px-3 text-xs">Sauvegarder</button>`
+  } else { row.style.background=''; cell.innerHTML='' }
+}
+
+async function saveTarif(id){
+  const tarif=allTarifs.find(t=>t.id===id); if(!tarif) return
+  const newVal=parseFloat(document.getElementById(`val-${id}`).value)
+  if(isNaN(newVal)) return
+  document.getElementById(`savecell-${id}`).innerHTML='<span class="text-xs">...</span>'
+  const {error}=await db.schema('ecoclean').from('tarifs').update({valeur:newVal}).eq('id',id)
+  if(error){toast('Erreur','error');return}
+  await db.schema('ecoclean').from('tarifs_historique').insert({
+    categorie:tarif.categorie,code:tarif.code,
+    ancien_prix:parseFloat(tarif.valeur),nouveau_prix:newVal,
+    modifie_par:'admin@ecoclean.fr',commentaire:'Modif admin'
+  })
+  allTarifs=allTarifs.map(t=>t.id===id?{...t,valeur:newVal}:t)
+  document.getElementById(`row-${id}`).style.background=''
+  document.getElementById(`savecell-${id}`).innerHTML=''
+  toast(`${tarif.label} mis à jour`)
+}
+
+checkAuth()
+</script>
+</body>
+</html>
