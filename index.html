@@ -1,31 +1,774 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0a0a0a" />
-    <meta name="description" content="SEMOUS — Restaurant halal, bols à la semoule. Commandez en ligne, livraison ou retrait à Toulouse." />
-    <title>SEMOUS — Bols à la semoule, Toulouse</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    <script>
-      // Restore path from GitHub Pages 404 redirect
-      (function(l) {
-        if (l.search[1] === '/') {
-          var decoded = l.search.slice(1).split('&').map(function(s) {
-            return s.replace(/~and~/g, '&');
-          }).join('?');
-          window.history.replaceState(null, null,
-            l.pathname.slice(0, -1) + decoded + l.hash
-          );
-        }
-      }(window.location));
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Eco'Clean — Demande de devis</title>
+<meta name="description" content="Eco'Clean — Formulaire de demande de devis nettoyage pour agences immobilières"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: { colors: {
+    eco: { green:'#16532d', dark:'#0d3a1f', light:'#1e7040', pale:'#e8f5ec', border:'#c3e6cb', muted:'#6c757d' }
+  }, fontFamily: { sans: ['Inter','system-ui','sans-serif'] } } }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*{box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif}
+.step-view{display:none}
+.step-view.active{display:block}
+input,select,textarea{font-family:inherit}
+input[type=checkbox],input[type=radio]{accent-color:#16532d;width:16px;height:16px;cursor:pointer}
+.inp{width:100%;border:1px solid #d1d5db;border-radius:8px;padding:10px 12px;font-size:14px;transition:border-color .15s,box-shadow .15s;background:#fff}
+.inp:focus{outline:none;border-color:#16532d;box-shadow:0 0 0 3px rgba(22,83,45,.12)}
+.inp-err{border-color:#dc2626}
+.lbl{display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:6px}
+.card{background:#fff;border-radius:12px;border:1px solid #e5e7eb;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.sec-title{font-size:11px;font-weight:700;color:#16532d;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+.btn-green{background:#16532d;color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;font-size:14px;border:none;cursor:pointer;transition:background .15s}
+.btn-green:hover{background:#1e7040}
+.btn-green:disabled{opacity:.5;cursor:not-allowed}
+.btn-outline{background:#fff;color:#16532d;border:1px solid #c3e6cb;padding:10px 20px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;transition:background .15s}
+.btn-outline:hover{background:#e8f5ec}
+.btn-ghost{background:transparent;color:#6c757d;padding:10px 20px;border-radius:8px;font-weight:500;font-size:14px;border:none;cursor:pointer;transition:background .15s}
+.btn-ghost:hover{background:#f3f4f6}
+.chk-row{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#374151;padding:6px 0}
+.chk-row input{flex-shrink:0}
+.radio-card{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:14px;transition:all .15s}
+.radio-card:hover{border-color:#16532d}
+.radio-card.selected{border-color:#16532d;background:#e8f5ec;color:#0d3a1f;font-weight:500}
+.niveau-btn{padding:8px 14px;border-radius:20px;border:1.5px solid #e5e7eb;font-size:13px;cursor:pointer;transition:all .15s;background:#fff;font-weight:500}
+.niveau-btn:hover{border-color:#16532d}
+.niveau-btn.selected{background:#16532d;color:#fff;border-color:#16532d}
+.opt-chk{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#374151;padding:5px 10px;border-radius:6px;transition:background .1s}
+.opt-chk:hover{background:#f3f4f6}
+.opt-chk input{flex-shrink:0}
+.tag{font-size:11px;color:#6c757d;margin-left:4px}
+.warn-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 14px;font-size:13px;color:#c2410c}
+.err-msg{font-size:12px;color:#dc2626;margin-top:4px}
+.tooltip{font-size:11px;color:#6c757d;margin-top:4px}
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- HEADER -->
+<header class="bg-eco-green text-white">
+  <div class="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
+    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-lg">🍃</div>
+    <div>
+      <h1 class="font-bold text-lg leading-tight">Mr &amp; Mrs Eco'Clean</h1>
+      <p class="text-xs text-white/70">Demande de devis nettoyage — Agences immobilières</p>
+    </div>
+  </div>
+</header>
+
+<!-- STEP INDICATOR -->
+<div class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-20">
+  <div class="max-w-3xl mx-auto px-4 py-3">
+    <div class="flex items-center">
+      <div class="flex items-center gap-2">
+        <div id="si1" class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-eco-green text-white transition-all">1</div>
+        <span id="sl1" class="text-sm font-semibold text-eco-green hidden sm:block">Identification</span>
+      </div>
+      <div id="sb1" class="flex-1 mx-3 h-0.5 bg-eco-green transition-all"></div>
+      <div class="flex items-center gap-2">
+        <div id="si2" class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-gray-200 text-gray-500 transition-all">2</div>
+        <span id="sl2" class="text-sm font-medium text-gray-400 hidden sm:block">Prestations</span>
+      </div>
+      <div id="sb2" class="flex-1 mx-3 h-0.5 bg-gray-200 transition-all"></div>
+      <div class="flex items-center gap-2">
+        <div id="si3" class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-gray-200 text-gray-500 transition-all">3</div>
+        <span id="sl3" class="text-sm font-medium text-gray-400 hidden sm:block">Récapitulatif</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="max-w-3xl mx-auto px-4 py-8">
+
+<!-- ===================== CONFIRMATION ===================== -->
+<div id="view-conf" class="step-view hidden">
+  <div class="card max-w-md mx-auto text-center py-10">
+    <div class="w-16 h-16 bg-eco-pale rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">✅</div>
+    <h2 class="text-xl font-bold mb-2 text-gray-900">Demande envoyée !</h2>
+    <p class="text-gray-500 text-sm mb-4">Votre demande a bien été reçue et est en cours de vérification.</p>
+    <div class="bg-eco-pale border border-eco-border rounded-xl px-5 py-4 mb-6 inline-block">
+      <p class="text-xs text-gray-500 mb-1">Référence de votre demande</p>
+      <p id="conf-ref" class="text-2xl font-bold text-eco-green tracking-widest">—</p>
+    </div>
+    <p class="text-sm text-gray-500 mb-6">Eco'Clean vous recontactera rapidement avec une proposition validée.</p>
+    <button onclick="location.reload()" class="btn-green">Nouvelle demande</button>
+  </div>
+</div>
+
+<!-- ===================== ÉTAPE 1 ===================== -->
+<div id="step1" class="step-view active space-y-6">
+
+  <!-- SUPERFICIE HERO -->
+  <div class="bg-eco-green text-white rounded-2xl p-6 shadow-md">
+    <p class="text-xs font-bold uppercase tracking-wider text-white/70 mb-3">Superficie du bien à nettoyer</p>
+    <div class="flex items-end gap-4 flex-wrap">
+      <div class="flex-1 min-w-[160px]">
+        <label class="block text-sm font-semibold text-white/90 mb-2">Superficie totale <span class="text-red-300">*</span></label>
+        <div class="relative">
+          <input type="number" id="surface" placeholder="Ex : 65" min="1" max="999"
+            class="w-full bg-white/15 border border-white/30 rounded-xl px-4 py-3 text-white text-3xl font-bold placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
+            oninput="onSurfaceInput(this.value)"/>
+          <span class="absolute right-4 top-1/2 -translate-y-1/2 text-white/60 text-xl font-semibold">m²</span>
+        </div>
+      </div>
+      <div id="surface-info" class="pb-1 hidden">
+        <div class="bg-white/20 rounded-xl px-4 py-2 text-center">
+          <div id="surface-range" class="text-sm font-bold text-white"></div>
+          <div id="surface-base" class="text-xs text-white/70 mt-0.5"></div>
+        </div>
+      </div>
+    </div>
+    <p class="text-xs text-white/50 mt-3">Au-delà de 100 m² → devis manuel automatique</p>
+    <div id="surface-err" class="err-msg hidden text-red-300 mt-2"></div>
+    <details class="mt-4">
+      <summary class="text-xs text-white/60 cursor-pointer hover:text-white/80 select-none">+ Répartition par pièce (optionnel)</summary>
+      <div class="grid grid-cols-3 gap-3 mt-3">
+        <div><label class="text-xs text-white/70 block mb-1">Salon / Séjour m²</label><input type="number" id="surf_salon" placeholder="0" min="0" class="w-full bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/40"/></div>
+        <div><label class="text-xs text-white/70 block mb-1">Chambres m²</label><input type="number" id="surf_chambres" placeholder="0" min="0" class="w-full bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/40"/></div>
+        <div><label class="text-xs text-white/70 block mb-1">Cuisine m²</label><input type="number" id="surf_cuisine" placeholder="0" min="0" class="w-full bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/40"/></div>
+        <div><label class="text-xs text-white/70 block mb-1">SDB / WC m²</label><input type="number" id="surf_sdb" placeholder="0" min="0" class="w-full bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/40"/></div>
+        <div><label class="text-xs text-white/70 block mb-1">Couloir / Entrée m²</label><input type="number" id="surf_couloir" placeholder="0" min="0" class="w-full bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/40"/></div>
+        <div><label class="text-xs text-white/70 block mb-1">Autres m²</label><input type="number" id="surf_autres" placeholder="0" min="0" class="w-full bg-white/15 border border-white/20 rounded-lg px-3 py-2 text-white text-sm placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white/40"/></div>
+      </div>
+    </details>
+  </div>
+
+  <!-- INFOS AGENCE -->
+  <div class="card">
+    <p class="sec-title">Informations agence</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div><label class="lbl">Nom de l'agence <span class="text-red-500">*</span></label><input type="text" id="nom_agence" class="inp" placeholder="Ex : Immo Lyon Centre"/><div id="e_nom_agence" class="err-msg hidden">Champ requis</div></div>
+      <div><label class="lbl">Gestionnaire <span class="text-red-500">*</span></label><input type="text" id="gestionnaire" class="inp" placeholder="Prénom Nom"/><div id="e_gestionnaire" class="err-msg hidden">Champ requis</div></div>
+      <div><label class="lbl">Téléphone <span class="text-red-500">*</span></label><input type="tel" id="telephone" class="inp" placeholder="06 00 00 00 00"/><div id="e_telephone" class="err-msg hidden">Champ requis</div></div>
+      <div><label class="lbl">Email <span class="text-red-500">*</span></label><input type="email" id="email" class="inp" placeholder="contact@agence.fr"/><div id="e_email" class="err-msg hidden">Email invalide</div></div>
+      <div class="sm:col-span-2"><label class="lbl">Adresse de l'agence</label><input type="text" id="adresse_agence" class="inp" placeholder="12 rue des Lilas, 31000 Toulouse"/></div>
+      <div><label class="lbl">SIRET (optionnel)</label><input type="text" id="siret" class="inp" placeholder="000 000 000 00000"/></div>
+    </div>
+  </div>
+
+  <!-- ADRESSE CHANTIER -->
+  <div class="card">
+    <p class="sec-title">Adresse du chantier</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="sm:col-span-3"><label class="lbl">Adresse complète <span class="text-red-500">*</span></label><input type="text" id="adresse_chantier" class="inp" placeholder="3 avenue des Pins"/><div id="e_adresse_chantier" class="err-msg hidden">Champ requis</div></div>
+      <div><label class="lbl">Code postal <span class="text-red-500">*</span></label><input type="text" id="code_postal" class="inp" placeholder="31000"/><div id="e_code_postal" class="err-msg hidden">Champ requis</div></div>
+      <div><label class="lbl">Ville <span class="text-red-500">*</span></label><input type="text" id="ville" class="inp" placeholder="Toulouse"/><div id="e_ville" class="err-msg hidden">Champ requis</div></div>
+      <div><label class="lbl">Étage</label><input type="text" id="etage" class="inp" placeholder="Ex : 3e"/></div>
+    </div>
+    <div class="flex flex-wrap gap-5 mt-4">
+      <label class="chk-row"><input type="checkbox" id="ascenseur"/> Ascenseur disponible</label>
+      <label class="chk-row"><input type="checkbox" id="etage_sans_asc"/> Étage sans ascenseur <span class="tag">(+15€)</span></label>
+      <label class="chk-row"><input type="checkbox" id="stationnement_difficile"/> Stationnement difficile <span class="tag">(+10€)</span></label>
+    </div>
+    <div class="mt-4">
+      <label class="lbl">Accès aux clés <span class="text-red-500">*</span></label>
+      <select id="acces_cles" class="inp">
+        <option value="agence">Agence</option>
+        <option value="boite_cles">Boîte à clés</option>
+        <option value="proprietaire">Propriétaire sur place</option>
+        <option value="locataire">Locataire sur place</option>
+        <option value="autre">Autre (préciser en commentaire)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- TYPE DE BIEN -->
+  <div class="card">
+    <p class="sec-title">Type de bien</p>
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2" id="type-bien-grid">
+      <label class="radio-card" onclick="selectTypeBien(this,'Studio')"><input type="radio" name="type_bien" value="Studio" class="hidden"/>Studio</label>
+      <label class="radio-card" onclick="selectTypeBien(this,'T1')"><input type="radio" name="type_bien" value="T1" class="hidden"/>T1</label>
+      <label class="radio-card" onclick="selectTypeBien(this,'T2')"><input type="radio" name="type_bien" value="T2" class="hidden"/>T2</label>
+      <label class="radio-card" onclick="selectTypeBien(this,'T3')"><input type="radio" name="type_bien" value="T3" class="hidden"/>T3</label>
+      <label class="radio-card" onclick="selectTypeBien(this,'T4')"><input type="radio" name="type_bien" value="T4" class="hidden"/>T4</label>
+      <label class="radio-card" onclick="selectTypeBien(this,'T5+')"><input type="radio" name="type_bien" value="T5+" class="hidden"/>T5+</label>
+      <label class="radio-card" onclick="selectTypeBien(this,'Maison')"><input type="radio" name="type_bien" value="Maison" class="hidden"/>Maison</label>
+      <label class="radio-card" onclick="selectTypeBien(this,'Local commercial')"><input type="radio" name="type_bien" value="Local commercial" class="hidden"/>Local commercial</label>
+      <label class="radio-card" onclick="selectTypeBien(this,'Bureau')"><input type="radio" name="type_bien" value="Bureau" class="hidden"/>Bureau</label>
+      <label class="radio-card" onclick="selectTypeBien(this,'Autre')"><input type="radio" name="type_bien" value="Autre" class="hidden"/>Autre</label>
+    </div>
+    <div id="e_type_bien" class="err-msg hidden mt-2">Veuillez sélectionner un type de bien</div>
+  </div>
+
+  <!-- TYPE D'INTERVENTION -->
+  <div class="card">
+    <p class="sec-title">Type d'intervention <span class="text-red-500">*</span></p>
+    <p class="text-xs text-gray-500 mb-3">Plusieurs choix possibles</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-1">
+      <label class="chk-row"><input type="checkbox" name="intervention" value="simple"/> Nettoyage simple</label>
+      <label class="chk-row"><input type="checkbox" name="intervention" value="avant_vente"/> Nettoyage avant vente</label>
+      <label class="chk-row"><input type="checkbox" name="intervention" value="avant_location"/> Nettoyage avant location</label>
+      <label class="chk-row"><input type="checkbox" name="intervention" value="apres_depart"/> Après départ locataire</label>
+      <label class="chk-row"><input type="checkbox" name="intervention" value="remise_en_etat"/> Remise en état</label>
+      <label class="chk-row"><input type="checkbox" name="intervention" value="apres_travaux"/> Après travaux</label>
+      <label class="chk-row"><input type="checkbox" name="intervention" value="tres_sale"/> Logement très sale</label>
+      <label class="chk-row"><input type="checkbox" name="intervention" value="sinistre"/> Après sinistre (incendie / inondation)</label>
+      <label class="chk-row"><input type="checkbox" name="intervention" value="insalubre"/> Logement insalubre <span class="tag">→ devis manuel</span></label>
+      <label class="chk-row"><input type="checkbox" name="intervention" value="urgent"/> Nettoyage urgent 24h <span class="tag">(×1.25)</span></label>
+    </div>
+    <div id="e_intervention" class="err-msg hidden mt-2">Veuillez sélectionner au moins un type d'intervention</div>
+  </div>
+
+  <!-- FACTURATION -->
+  <div class="card">
+    <p class="sec-title">Facturation</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="sm:col-span-2">
+        <label class="lbl">À qui facturer l'intervention ? <span class="text-red-500">*</span></label>
+        <select id="payeur" class="inp">
+          <option value="agence">Agence immobilière</option>
+          <option value="proprietaire">Propriétaire</option>
+          <option value="locataire">Locataire</option>
+          <option value="depot_garantie">Retenue sur dépôt de garantie</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div><label class="lbl">Nom du payeur / société <span class="text-red-500">*</span></label><input type="text" id="nom_payeur" class="inp" placeholder="Nom complet ou raison sociale"/><div id="e_nom_payeur" class="err-msg hidden">Champ requis</div></div>
+      <div><label class="lbl">Adresse de facturation</label><input type="text" id="adresse_facturation" class="inp" placeholder="5 rue du Commerce, 31000 Toulouse"/></div>
+      <div><label class="lbl">Email de facturation</label><input type="email" id="email_facturation" class="inp" placeholder="facturation@..."/></div>
+      <div><label class="lbl">Téléphone du payeur</label><input type="tel" id="tel_payeur" class="inp" placeholder="06 00 00 00 00"/></div>
+    </div>
+  </div>
+
+  <div class="flex justify-end pt-2">
+    <button class="btn-green text-base px-8 py-3" onclick="goStep2()">Étape suivante — Prestations →</button>
+  </div>
+</div>
+
+<!-- ===================== ÉTAPE 2 ===================== -->
+<div id="step2" class="step-view space-y-6">
+
+  <!-- CUISINE -->
+  <div class="card">
+    <p class="sec-title">🍳 Cuisine</p>
+    <p class="lbl">État général</p>
+    <div class="flex flex-wrap gap-2 mb-4">
+      <button class="niveau-btn selected" onclick="setNiveau('cuisine','propre',this)">Propre</button>
+      <button class="niveau-btn" onclick="setNiveau('cuisine','sale',this)">Sale</button>
+      <button class="niveau-btn" onclick="setNiveau('cuisine','tres_sale',this)">Très sale</button>
+      <button class="niveau-btn" onclick="setNiveau('cuisine','exceptionnel',this)">État exceptionnel → Devis manuel</button>
+    </div>
+    <div id="cuisine-opts" class="hidden">
+      <p class="lbl mt-2">Options à inclure</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-0.5">
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="four"/><span>Four<span class="tag">+15€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="frigo"/><span>Frigo<span class="tag">+15€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="congelateur"/><span>Congélateur<span class="tag">+15€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="hotte"/><span>Hotte grasse<span class="tag">+20€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="micro_ondes"/><span>Micro-ondes<span class="tag">+10€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="lave_vaisselle"/><span>Lave-vaisselle<span class="tag">+15€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="plaques"/><span>Plaques de cuisson<span class="tag">+10€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="placards_int"/><span>Placards intérieurs<span class="tag">+15€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="placards_ext"/><span>Placards extérieurs<span class="tag">+10€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="credence"/><span>Crédence / murs cuisine<span class="tag">+15€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="cuisine_opt" value="graisse"/><span>Graisse importante<span class="tag">+25€</span></span></label>
+      </div>
+    </div>
+    <div id="cuisine-except" class="warn-box hidden">⚠ État exceptionnel — cette demande passera en devis manuel.</div>
+  </div>
+
+  <!-- SALLE DE BAIN -->
+  <div class="card">
+    <p class="sec-title">🚿 Salle de bain / WC</p>
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="lbl">Nombre de salles de bain</label>
+        <select id="nb_sdb" class="inp">
+          <option value="1">1 salle de bain</option>
+          <option value="2">2 salles de bain (+30€)</option>
+          <option value="3">3 et plus (+60€)</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">WC séparés</label>
+        <select id="nb_wc" class="inp">
+          <option value="0">Aucun WC séparé</option>
+          <option value="1">1 WC séparé (+10€)</option>
+          <option value="2">2 WC séparés (+20€)</option>
+        </select>
+      </div>
+    </div>
+    <p class="lbl">État général</p>
+    <div class="flex flex-wrap gap-2 mb-4">
+      <button class="niveau-btn selected" onclick="setNiveau('sdb','propre',this)">Propre</button>
+      <button class="niveau-btn" onclick="setNiveau('sdb','sale',this)">Sale</button>
+      <button class="niveau-btn" onclick="setNiveau('sdb','tres_sale',this)">Très sale</button>
+      <button class="niveau-btn" onclick="setNiveau('sdb','exceptionnel',this)">État exceptionnel → Devis manuel</button>
+    </div>
+    <div id="sdb-opts" class="hidden">
+      <p class="lbl mt-2">Options</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-0.5">
+        <label class="opt-chk"><input type="checkbox" name="sdb_opt" value="joints_noirs"/><span>Joints noirs<span class="tag">+20€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="sdb_opt" value="calcaire"/><span>Calcaire important<span class="tag">+20€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="sdb_opt" value="moisissures"/><span>Moisissures<span class="tag">+25€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="sdb_opt" value="wc_sale"/><span>WC très sale<span class="tag">+15€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="sdb_opt" value="paroi_douche"/><span>Paroi de douche<span class="tag">+15€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="sdb_opt" value="bac_douche"/><span>Bac de douche<span class="tag">+10€</span></span></label>
+        <label class="opt-chk"><input type="checkbox" name="sdb_opt" value="robinetterie"/><span>Robinetterie tartrée<span class="tag">+15€</span></span></label>
+      </div>
+    </div>
+    <div id="sdb-except" class="warn-box hidden">⚠ État exceptionnel — cette demande passera en devis manuel.</div>
+  </div>
+
+  <!-- SOLS -->
+  <div class="card">
+    <p class="sec-title">🪟 Sols</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="lbl">Type de revêtement</label>
+        <select id="type_sol" class="inp">
+          <option value="">— Sélectionner —</option>
+          <option value="Carrelage">Carrelage</option>
+          <option value="Parquet">Parquet</option>
+          <option value="Lino">Lino / PVC</option>
+          <option value="Moquette">Moquette</option>
+          <option value="Béton ciré">Béton ciré</option>
+          <option value="Mixte">Mixte</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+    </div>
+    <p class="lbl">État des sols</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-0.5 mb-4">
+      <label class="opt-chk"><input type="checkbox" name="sol_etat" value="poussiere"/> Poussière simple</label>
+      <label class="opt-chk"><input type="checkbox" name="sol_etat" value="traces"/> Traces / salissures</label>
+      <label class="opt-chk"><input type="checkbox" name="sol_etat" value="graisse"/> Graisse</label>
+      <label class="opt-chk"><input type="checkbox" name="sol_etat" value="peinture"/> Peinture</label>
+      <label class="opt-chk"><input type="checkbox" name="sol_etat" value="platre"/> Plâtre / colle</label>
+      <label class="opt-chk"><input type="checkbox" name="sol_etat" value="poils_animaux"/> Poils d'animaux</label>
+      <label class="opt-chk"><input type="checkbox" name="sol_etat" value="taches"/> Taches importantes</label>
+    </div>
+    <p class="lbl">Traitements spéciaux des sols</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-0.5">
+      <label class="opt-chk"><input type="checkbox" name="sols_opt" value="shampoing"/><span>Shampooing moquette<span class="tag">+50€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="sols_opt" value="decapage"/><span>Décapage des sols<span class="tag">+60€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="sols_opt" value="polissage"/><span>Polissage / lustrage<span class="tag">+40€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="sols_opt" value="parquet_reno"/><span>Remise en état parquet<span class="tag">+55€</span></span></label>
+    </div>
+  </div>
+
+  <!-- VITRES -->
+  <div class="card">
+    <p class="sec-title">🪟 Vitres &amp; Menuiseries</p>
+    <div class="space-y-2">
+      <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-eco-green transition" onclick="setVitres(this,'aucune')"><input type="radio" name="vitres" value="aucune" checked class="accent-eco-green shrink-0"/> Aucune vitre</label>
+      <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-eco-green transition" onclick="setVitres(this,'v1_3')"><input type="radio" name="vitres" value="v1_3" class="accent-eco-green shrink-0"/> Vitres intérieures — 1 à 3 <span class="tag ml-2">+20€</span></label>
+      <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-eco-green transition" onclick="setVitres(this,'v4_6')"><input type="radio" name="vitres" value="v4_6" class="accent-eco-green shrink-0"/> Vitres int. + ext. — 4 à 6 <span class="tag ml-2">+35€</span></label>
+      <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-eco-green transition" onclick="setVitres(this,'v7_10')"><input type="radio" name="vitres" value="v7_10" class="accent-eco-green shrink-0"/> Baies vitrées / 7 à 10 <span class="tag ml-2">+50€</span></label>
+      <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-eco-green transition" onclick="setVitres(this,'plus_10')"><input type="radio" name="vitres" value="plus_10" class="accent-eco-green shrink-0"/> Plus de 10 vitres <span class="tag ml-2">→ devis manuel</span></label>
+    </div>
+    <div class="mt-3"><label class="chk-row"><input type="checkbox" id="volets"/> Volets intérieurs à nettoyer <span class="tag">(+20€)</span></label></div>
+  </div>
+
+  <!-- ZONES -->
+  <div class="card">
+    <p class="sec-title">📦 Zones supplémentaires</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-0.5">
+      <label class="opt-chk"><input type="checkbox" name="zones_opt" value="balcon"/><span>Balcon<span class="tag">+20€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="zones_opt" value="terrasse"/><span>Terrasse<span class="tag">+30€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="zones_opt" value="cave"/><span>Cave<span class="tag">+30€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="zones_opt" value="garage"/><span>Garage<span class="tag">+30€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="zones_opt" value="cellier"/><span>Cellier<span class="tag">+20€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="zones_opt" value="parking"/><span>Parking / sous-sol<span class="tag">+35€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="zones_opt" value="escaliers"/><span>Escaliers intérieurs<span class="tag">+15€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="zones_opt" value="volets"/><span>Volets<span class="tag">+20€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="zones_opt" value="dechets"/><span>Déchets à évacuer<span class="tag">→ devis manuel</span></span></label>
+    </div>
+  </div>
+
+  <!-- PRESTATIONS SPÉCIALES -->
+  <div class="card">
+    <p class="sec-title">⭐ Prestations spéciales</p>
+    <p class="text-xs text-gray-500 mb-3">Services complémentaires pour des situations particulières</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-0.5">
+      <label class="opt-chk"><input type="checkbox" name="speciales_opt" value="desinfection"/><span>Désinfection complète<span class="tag">+60€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="speciales_opt" value="odeurs"/><span>Traitement mauvaises odeurs<span class="tag">+45€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="speciales_opt" value="moisissures_traite"/><span>Traitement anti-moisissures<span class="tag">+50€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="speciales_opt" value="degat_eaux"/><span>Après dégât des eaux<span class="tag">+70€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="speciales_opt" value="parties_communes"/><span>Parties communes / hall d'entrée<span class="tag">+40€</span></span></label>
+      <label class="opt-chk"><input type="checkbox" name="speciales_opt" value="debarras_leger"/><span>Débarras léger (quelques objets)<span class="tag">+35€</span></span></label>
+    </div>
+  </div>
+
+  <!-- PHOTOS -->
+  <div class="card">
+    <p class="sec-title">📸 Photos</p>
+    <p class="text-sm text-gray-500 mb-3">Les photos permettent d'affiner le devis.</p>
+    <div class="flex items-center gap-4 flex-wrap">
+      <label class="lbl mb-0">Nombre de photos prévues</label>
+      <input type="number" id="nb_photos" min="0" max="50" value="0" class="inp w-24"/>
+    </div>
+    <div id="photos-warn" class="warn-box mt-2 hidden">Sans photos, la demande pourra passer en devis manuel.</div>
+    <div class="mt-3">
+      <label class="lbl">Commentaire / informations complémentaires</label>
+      <textarea id="commentaire_agence" rows="3" class="inp resize-none" placeholder="Précisez tout élément utile : odeur de tabac, animaux, code d'accès, urgence particulière..."></textarea>
+    </div>
+  </div>
+
+  <div class="flex justify-between pt-2">
+    <button class="btn-ghost" onclick="goStep(1)">← Retour</button>
+    <button class="btn-green text-base px-8 py-3" onclick="goStep3()">Voir le récapitulatif →</button>
+  </div>
+</div>
+
+<!-- ===================== ÉTAPE 3 ===================== -->
+<div id="step3" class="step-view space-y-6">
+  <div id="estimation-box"></div>
+  <div id="recap-content" class="card"></div>
+  <div class="flex justify-between pt-2">
+    <button class="btn-ghost" onclick="goStep(2)">← Retour</button>
+    <button id="btn-submit" class="btn-green text-base px-8 py-3" onclick="submitForm()">Envoyer la demande →</button>
+  </div>
+</div>
+
+</main>
+
+<footer class="max-w-3xl mx-auto px-4 py-6 text-center text-xs text-gray-400">
+  Mr &amp; Mrs Eco'Clean — Nettoyage professionnel Toulouse —
+  <a href="admin.html" class="hover:text-eco-green">Admin</a>
+</footer>
+
+<script>
+const SUPA_URL = 'https://xbiirtewzzhcapuoxezt.supabase.co'
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiaWlydGV3enpoY2FwdW94ZXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODk1NjYsImV4cCI6MjA5MzY2NTU2Nn0.0K8w2ft5QcSYu3BSg42HsJt2Ov9l0KcTIo2WzbBxdrQ'
+const db = supabase.createClient(SUPA_URL, SUPA_KEY)
+
+let tarifs = []
+let niveauCuisine = 'propre'
+let niveauSdb = 'propre'
+let vitresOpt = 'aucune'
+let selectedTypeBien = ''
+
+async function loadTarifs() {
+  const { data } = await db.schema('ecoclean').from('tarifs').select('*').eq('actif', true)
+  if (data) tarifs = data
+}
+
+function T(cat, code) {
+  const t = tarifs.find(x => x.categorie === cat && x.code === code)
+  return t ? parseFloat(t.valeur) : 0
+}
+
+function onSurfaceInput(val) {
+  const s = parseFloat(val)
+  const info = document.getElementById('surface-info')
+  const range = document.getElementById('surface-range')
+  const base = document.getElementById('surface-base')
+  if (!val || isNaN(s) || s <= 0) { info.classList.add('hidden'); return }
+  info.classList.remove('hidden')
+  if (s > 100) {
+    range.textContent = '+ 100 m² → Devis manuel'
+    base.textContent = 'Estimation personnalisée'
+  } else {
+    const r = s<=20?'0–20 m²':s<=40?'21–40 m²':s<=60?'41–60 m²':s<=80?'61–80 m²':'81–100 m²'
+    const p = s<=20?T('surface','s_0_20')||60:s<=40?T('surface','s_21_40')||90:s<=60?T('surface','s_41_60')||130:s<=80?T('surface','s_61_80')||170:T('surface','s_81_100')||220
+    range.textContent = r
+    base.textContent = `Base : ${p} € HT`
+  }
+}
+
+function selectTypeBien(el, val) {
+  selectedTypeBien = val
+  document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'))
+  el.classList.add('selected')
+  el.querySelector('input').checked = true
+}
+
+function setNiveau(type, val, btn) {
+  const btns = btn.parentElement.querySelectorAll('.niveau-btn')
+  btns.forEach(b => b.classList.remove('selected'))
+  btn.classList.add('selected')
+  if (type === 'cuisine') {
+    niveauCuisine = val
+    document.getElementById('cuisine-opts').classList.toggle('hidden', val === 'propre' || val === 'exceptionnel')
+    document.getElementById('cuisine-except').classList.toggle('hidden', val !== 'exceptionnel')
+  } else {
+    niveauSdb = val
+    document.getElementById('sdb-opts').classList.toggle('hidden', val === 'propre' || val === 'exceptionnel')
+    document.getElementById('sdb-except').classList.toggle('hidden', val !== 'exceptionnel')
+  }
+}
+
+function setVitres(el, val) {
+  vitresOpt = val
+  document.querySelectorAll('[name=vitres]').forEach(r => {
+    r.closest('label').style.borderColor = ''
+    r.closest('label').style.background = ''
+  })
+  el.style.borderColor = '#16532d'
+  el.style.background = '#e8f5ec'
+}
+
+function getChecked(name) {
+  return [...document.querySelectorAll(`[name=${name}]:checked`)].map(e => e.value)
+}
+
+function v(id) { return (document.getElementById(id)||{}).value||'' }
+
+function showErr(id, show) {
+  const el = document.getElementById(id)
+  if (el) el.classList.toggle('hidden', !show)
+  const inp = document.getElementById(id.replace('e_',''))
+  if (inp) inp.classList.toggle('inp-err', show)
+}
+
+function validateStep1() {
+  let ok = true
+  const fields = [
+    {id:'nom_agence', check: () => v('nom_agence').trim()},
+    {id:'gestionnaire', check: () => v('gestionnaire').trim()},
+    {id:'telephone', check: () => v('telephone').trim()},
+    {id:'email', check: () => /\S+@\S+\.\S+/.test(v('email'))},
+    {id:'adresse_chantier', check: () => v('adresse_chantier').trim()},
+    {id:'code_postal', check: () => v('code_postal').trim()},
+    {id:'ville', check: () => v('ville').trim()},
+    {id:'nom_payeur', check: () => v('nom_payeur').trim()},
+  ]
+  fields.forEach(f => { const pass = f.check(); showErr('e_'+f.id, !pass); if (!pass) ok = false })
+  const noSurface = !v('surface') || parseFloat(v('surface')) <= 0
+  document.getElementById('surface-err').textContent = noSurface ? 'La superficie est obligatoire' : ''
+  document.getElementById('surface-err').classList.toggle('hidden', !noSurface)
+  if (noSurface) ok = false
+  const noType = !selectedTypeBien
+  showErr('e_type_bien', noType)
+  if (noType) ok = false
+  const noInterv = getChecked('intervention').length === 0
+  showErr('e_intervention', noInterv)
+  if (noInterv) ok = false
+  return ok
+}
+
+function goStep2() {
+  if (!validateStep1()) { window.scrollTo({top:0,behavior:'smooth'}); return }
+  goStep(2)
+  const photos = parseInt(v('nb_photos'))||0
+  document.getElementById('photos-warn').classList.toggle('hidden', photos > 0)
+}
+
+function goStep3() { goStep(3); buildRecap() }
+
+function goStep(n) {
+  document.querySelectorAll('.step-view').forEach(s => s.classList.remove('active'))
+  document.getElementById(`step${n}`)?.classList.add('active')
+  updateStepIndicator(n)
+  window.scrollTo({top:0,behavior:'smooth'})
+}
+
+function updateStepIndicator(n) {
+  for (let i=1; i<=3; i++) {
+    const si = document.getElementById(`si${i}`)
+    const sl = document.getElementById(`sl${i}`)
+    const bar = document.getElementById(`sb${i}`)
+    if (!si) continue
+    if (i < n) {
+      si.className = 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-eco-green text-white'
+      si.textContent = '✓'
+      if (sl) sl.className = 'text-sm font-medium text-eco-green hidden sm:block'
+      if (bar) bar.className = 'flex-1 mx-3 h-0.5 bg-eco-green'
+    } else if (i === n) {
+      si.className = 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-eco-green text-white'
+      si.textContent = String(i)
+      if (sl) sl.className = 'text-sm font-semibold text-eco-green hidden sm:block'
+    } else {
+      si.className = 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-gray-200 text-gray-500'
+      si.textContent = String(i)
+      if (sl) sl.className = 'text-sm font-medium text-gray-400 hidden sm:block'
+      if (bar) bar.className = 'flex-1 mx-3 h-0.5 bg-gray-200'
+    }
+  }
+}
+
+function calculerEstimation() {
+  const interventions = getChecked('intervention')
+  const surface = parseFloat(v('surface'))||0
+  const cuisineOpts = getChecked('cuisine_opt')
+  const sdbOpts = getChecked('sdb_opt')
+  const solsOpts = getChecked('sols_opt')
+  const zonesOpts = getChecked('zones_opt')
+  const specialesOpts = getChecked('speciales_opt')
+  const nbSdb = parseInt(v('nb_sdb'))||1
+  const nbWc = parseInt(v('nb_wc'))||0
+
+  const isSurDevis = interventions.includes('insalubre')
+    || surface > 100 || !surface
+    || vitresOpt === 'plus_10'
+    || niveauCuisine === 'exceptionnel'
+    || niveauSdb === 'exceptionnel'
+    || zonesOpts.includes('dechets')
+  if (isSurDevis) return { surDevis: true }
+
+  const surfCode = surface<=20?'s_0_20':surface<=40?'s_21_40':surface<=60?'s_41_60':surface<=80?'s_61_80':'s_81_100'
+  const basePrice = T('surface', surfCode) || (surface<=20?60:surface<=40?90:surface<=60?130:surface<=80?170:220)
+
+  let cuisinePrice = cuisineOpts.reduce((s,o) => s+T('cuisine',o), 0)
+  if (niveauCuisine==='tres_sale') cuisinePrice *= 1.5
+  else if (niveauCuisine==='sale') cuisinePrice *= 1.2
+
+  let sdbPrice = sdbOpts.reduce((s,o) => s+T('sdb',o), 0)
+  if (nbSdb===2) sdbPrice += T('sdb','sdb_supp')||30
+  if (nbSdb>=3) sdbPrice += (T('sdb','sdb_supp')||30)*2
+  if (nbWc>=1) sdbPrice += nbWc * 10
+  if (niveauSdb==='tres_sale') sdbPrice *= 1.5
+  else if (niveauSdb==='sale') sdbPrice *= 1.2
+
+  const solsPrice = solsOpts.reduce((s,o) => s+T('sols',o), 0)
+  const vitresPrice = vitresOpt !== 'aucune' ? T('vitres', vitresOpt) : 0
+  const voletChecked = document.getElementById('volets')?.checked
+  let zonesPrice = zonesOpts.reduce((s,o) => s+(o!=='volets'?T('zones',o):0), 0)
+  if (voletChecked) zonesPrice += T('zones','volets')||20
+  const specialesPrice = specialesOpts.reduce((s,o) => s+T('speciales',o), 0)
+
+  const subtotal = basePrice + cuisinePrice + sdbPrice + solsPrice + vitresPrice + zonesPrice + specialesPrice
+
+  const priority = ['tres_sale','sinistre','apres_travaux','remise_en_etat','avant_vente','avant_location','apres_depart','simple']
+  let coefCode = 'simple'
+  for (const p of priority) { if (interventions.includes(p)) { coefCode=p; break } }
+  let coef = T('coefficients', coefCode) || 1
+  if (coef < 1) coef = 1
+
+  const urgentCoef = interventions.includes('urgent') ? (T('coefficients','urgent')||1.25) : 1
+  let estHT = subtotal * coef * urgentCoef
+
+  const etageFee = document.getElementById('etage_sans_asc')?.checked ? (T('params','etage_sans_asc')||15) : 0
+  const statFee = document.getElementById('stationnement_difficile')?.checked ? (T('params','stationnement')||10) : 0
+  estHT += etageFee + statFee
+  const minimum = T('params','minimum')||60
+  estHT = Math.max(estHT, minimum)
+
+  const tauxTva = T('params','tva')||10
+  const tva = estHT * tauxTva / 100
+  return {
+    surDevis: false,
+    estHT: Math.round(estHT*100)/100,
+    tva: Math.round(tva*100)/100,
+    estTTC: Math.round((estHT+tva)*100)/100,
+    tauxTva,
+    details: { basePrice, cuisinePrice:Math.round(cuisinePrice*100)/100, sdbPrice:Math.round(sdbPrice*100)/100, solsPrice, vitresPrice, zonesPrice, specialesPrice, coef, urgentCoef, etageFee, statFee }
+  }
+}
+
+function buildRecap() {
+  const r = calculerEstimation()
+  const estBox = document.getElementById('estimation-box')
+  if (r.surDevis) {
+    estBox.innerHTML = `<div class="rounded-xl border-2 border-orange-300 bg-orange-50 p-6 text-center">
+      <p class="text-lg font-bold text-orange-700 mb-1">Demande sur devis manuel</p>
+      <p class="text-sm text-orange-600">Votre demande nécessite une vérification personnalisée. Eco'Clean vous recontactera sous 24h.</p>
+    </div>`
+  } else {
+    const d = r.details
+    const lines = []
+    if (d.basePrice) lines.push(`Surface ${v('surface')} m² : ${d.basePrice} €`)
+    if (d.cuisinePrice) lines.push(`Cuisine (${niveauCuisine}) : ${d.cuisinePrice} €`)
+    if (d.sdbPrice) lines.push(`Salle de bain : ${d.sdbPrice} €`)
+    if (d.solsPrice) lines.push(`Sols (traitements) : ${d.solsPrice} €`)
+    if (d.vitresPrice) lines.push(`Vitres : ${d.vitresPrice} €`)
+    if (d.zonesPrice) lines.push(`Zones supplémentaires : ${d.zonesPrice} €`)
+    if (d.specialesPrice) lines.push(`Prestations spéciales : ${d.specialesPrice} €`)
+    if (d.coef>1) lines.push(`Coefficient intervention : ×${d.coef}`)
+    if (d.urgentCoef>1) lines.push(`Urgence : ×${d.urgentCoef}`)
+    if (d.etageFee) lines.push(`Étage sans ascenseur : +${d.etageFee} €`)
+    if (d.statFee) lines.push(`Stationnement difficile : +${d.statFee} €`)
+    estBox.innerHTML = `<div class="rounded-xl border-2 border-eco-border bg-eco-pale p-6 text-center">
+      <p class="text-xs font-bold text-eco-green uppercase tracking-wider mb-2">Estimation indicative</p>
+      <p class="text-5xl font-bold text-eco-dark mb-1">${r.estTTC.toFixed(2)} €<span class="text-xl font-normal ml-1">TTC</span></p>
+      <p class="text-sm text-gray-500">${r.estHT.toFixed(2)} € HT + TVA ${r.tauxTva}% (${r.tva.toFixed(2)} €)</p>
+      <div class="mt-4 text-xs text-gray-400 space-y-0.5">${lines.map(l=>`<p>${l}</p>`).join('')}</div>
+      <p class="text-xs text-gray-400 mt-3 italic">Indicatif — sous réserve de vérification de l'état réel du logement.</p>
+    </div>`
+  }
+
+  const interv_labels = {simple:'Nettoyage simple',avant_vente:'Avant vente',avant_location:'Avant location',apres_depart:'Après départ locataire',remise_en_etat:'Remise en état',apres_travaux:'Après travaux',tres_sale:'Très sale',sinistre:'Après sinistre',insalubre:'Insalubre',urgent:'Urgent'}
+  const interventions = getChecked('intervention').map(i=>interv_labels[i]||i).join(', ')
+  const cuisineOpts = getChecked('cuisine_opt').join(', ')||'Aucune option'
+  const sdbOpts = getChecked('sdb_opt').join(', ')||'Aucune option'
+  const solsEtat = getChecked('sol_etat').join(', ')||'—'
+  const solsOpts = getChecked('sols_opt').join(', ')||'Aucun traitement'
+  const zonesOpts = getChecked('zones_opt').join(', ')||'Aucune'
+  const specialesOpts = getChecked('speciales_opt').join(', ')||'Aucune'
+
+  function row(lbl,val) { return val?`<div class="flex gap-2 py-1.5 border-b border-gray-100 last:border-0 text-sm"><span class="text-gray-400 w-40 shrink-0">${lbl}</span><span class="font-medium text-gray-800">${val}</span></div>`:'' }
+  function section(title, rows) { return `<div class="mb-4"><p class="text-xs font-bold text-eco-green uppercase tracking-wide mb-2">${title}</p>${rows.join('')}</div>` }
+
+  document.getElementById('recap-content').innerHTML = `
+    <p class="sec-title">Récapitulatif de la demande</p>
+    ${section('Agence',[row('Agence',v('nom_agence')),row('Gestionnaire',v('gestionnaire')),row('Téléphone',v('telephone')),row('Email',v('email'))])}
+    ${section('Chantier',[row('Adresse',`${v('adresse_chantier')}, ${v('code_postal')} ${v('ville')}`),row('Type de bien',`${selectedTypeBien||'—'} — ${v('surface')} m²`),row('Intervention',interventions),row('Accès clés',v('acces_cles'))])}
+    ${section('Facturation',[row('Payeur',v('nom_payeur')),row('Type payeur',v('payeur')),row('Email fact.',v('email_facturation'))])}
+    ${section('Prestations',[row('Cuisine',`Niveau ${niveauCuisine} — ${cuisineOpts}`),row('Salle de bain',`Niveau ${niveauSdb} — ${sdbOpts}`),row('Sols',`${v('type_sol')||'—'} — ${solsEtat}`),row('Traitements sols',solsOpts),row('Vitres',vitresOpt),row('Zones',zonesOpts),row('Spéciales',specialesOpts),row('Photos prévues',v('nb_photos')||'0')])}
+  `
+}
+
+function genRef() {
+  const yr = String(new Date().getFullYear()).slice(-2)
+  return `ECO-${yr}-${Math.floor(Math.random()*9000+1000)}`
+}
+
+async function submitForm() {
+  const btn = document.getElementById('btn-submit')
+  btn.disabled = true
+  btn.textContent = 'Envoi en cours...'
+  try {
+    const r = calculerEstimation()
+    const ref = genRef()
+    const now = new Date().toISOString()
+    const interventions = getChecked('intervention')
+    const demande = {
+      id: ref, created_at: now, updated_at: now,
+      nom_agence: v('nom_agence'), gestionnaire: v('gestionnaire'), telephone: v('telephone'),
+      email: v('email'), adresse_agence: v('adresse_agence'), siret: v('siret')||null,
+      adresse_chantier: v('adresse_chantier'), code_postal: v('code_postal'), ville: v('ville'),
+      etage: v('etage')||null,
+      ascenseur: document.getElementById('ascenseur').checked,
+      stationnement_difficile: document.getElementById('stationnement_difficile').checked,
+      etage_sans_asc: document.getElementById('etage_sans_asc').checked,
+      acces_cles: v('acces_cles'),
+      type_bien: selectedTypeBien, surface: parseFloat(v('surface')),
+      type_intervention: interventions.join(','),
+      payeur: v('payeur'), nom_payeur: v('nom_payeur'),
+      adresse_facturation: v('adresse_facturation')||null,
+      email_facturation: v('email_facturation')||null,
+      tel_payeur: v('tel_payeur')||null,
+      niveau_cuisine: niveauCuisine, cuisine_options: getChecked('cuisine_opt'),
+      niveau_sdb: niveauSdb, sdb_options: getChecked('sdb_opt'),
+      type_sol: v('type_sol')||null, etat_sol: getChecked('sol_etat'),
+      sol_options: getChecked('sols_opt'),
+      vitres_option: vitresOpt, zones_options: getChecked('zones_opt'),
+      speciales_options: getChecked('speciales_opt'),
+      nb_photos: parseInt(v('nb_photos'))||0, photos_urls: [],
+      estimation_ht: r.surDevis ? null : r.estHT,
+      estimation_tva: r.surDevis ? null : r.tva,
+      estimation_ttc: r.surDevis ? null : r.estTTC,
+      taux_tva: r.tauxTva||10,
+      detail_calcul: r.surDevis ? {} : r.details,
+      sur_devis: r.surDevis, statut: 'nouveau', commentaire_interne: null,
+    }
+    const { error } = await db.schema('ecoclean').from('demandes').insert(demande)
+    if (error) throw error
+    document.getElementById('conf-ref').textContent = ref
+    document.querySelectorAll('.step-view').forEach(s => s.classList.remove('active'))
+    document.getElementById('view-conf').classList.remove('hidden')
+    window.scrollTo({top:0,behavior:'smooth'})
+  } catch(err) {
+    console.error(err)
+    alert('Erreur lors de l\'envoi. Veuillez réessayer.')
+    btn.disabled = false
+    btn.textContent = 'Envoyer la demande →'
+  }
+}
+
+loadTarifs()
+</script>
+</body>
 </html>
