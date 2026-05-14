@@ -6,53 +6,32 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  enable-and-deploy:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Enable GitHub Pages from gh-pages branch
-        run: |
-          curl -s -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/pages \
-            -d '{"source":{"branch":"gh-pages","path":"/"}}' \
-            -w "\nHTTP_STATUS:%{http_code}" || true
-          curl -s -X PUT \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/pages \
-            -d '{"source":{"branch":"gh-pages","path":"/"}}' \
-            -w "\nHTTP_STATUS:%{http_code}" || true
-          echo "Pages activation complete"
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
-      - uses: actions/setup-node@v4
+      - name: Upload static files
+        uses: actions/upload-pages-artifact@v3
         with:
-          node-version: '20'
-          cache: 'npm'
+          path: '.'
 
-      - name: Install
-        run: npm ci
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        env:
-          VITE_SUPABASE_URL: https://xbiirtewzzhcapuoxezt.supabase.co
-          VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiaWlydGV3enpoY2FwdW94ZXp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODk1NjYsImV4cCI6MjA5MzY2NTU2Nn0.0K8w2ft5QcSYu3BSg42HsJt2Ov9l0KcTIo2WzbBxdrQ
-          VITE_BASE_URL: /${{ github.event.repository.name }}/
-        run: npm run build
-
-      - name: Push to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          force_orphan: true
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
