@@ -1,6 +1,10 @@
 [build]
-  command = ""
+  command = "echo 'Site statique — aucun build'"
   publish = "."
+
+[build.environment]
+  NETLIFY_SKIP_FRAMEWORK_DETECTION = "1"
+  NODE_ENV = "production"
 
 # Headers sécurité
 [[headers]]
