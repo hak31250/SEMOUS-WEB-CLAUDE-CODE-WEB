@@ -337,10 +337,11 @@ function renderExpanded(d){
         <p class="text-xs font-semibold uppercase tracking-wide mb-2" style="color:#16532d">Prestations</p>
         ${ir('Cuisine',d.niveau_cuisine?`${d.niveau_cuisine} — ${(d.cuisine_options||[]).join(', ')||'—'}`:null)}
         ${ir('SDB',d.niveau_sdb?`${d.niveau_sdb} — ${(d.sdb_options||[]).join(', ')||'—'}`:null)}
-        ${d.type_sol?ir('Sol',`${d.type_sol} — ${(d.etat_sol||[]).join(', ')}` ):''}
+        ${d.type_sol?ir('Sol',`${d.type_sol} — ${(d.etat_sol||[]).join(', ')||'—'}`):''}
+        ${(d.sol_options||[]).length?ir('Traitements sols',(d.sol_options||[]).join(', '));:''}
         ${ir('Vitres',d.vitres_option)}
-        ${(d.zones_options||[]).length?ir('Zones',d.zones_options.join(', ')):''}
-        ${(d.speciales_options||[]).length?ir('Spéciales',d.speciales_options.join(', ')):''}
+        ${(d.zones_options||[]).length?ir('Zones',d.zones_options.join(', ')): ''}
+        ${(d.speciales_options||[]).length?ir('Spéciales',d.speciales_options.join(', ')): ''}
         ${d.nb_photos?ir('Photos',`${d.nb_photos}`):''}
       </div>
     </div>
@@ -391,7 +392,8 @@ function openPropret(id){
     '--- PRESTATIONS ---',
     d.niveau_cuisine?`Cuisine : ${d.niveau_cuisine} — ${(d.cuisine_options||[]).join(', ')||'—'}`:null,
     d.niveau_sdb?`SDB : ${d.niveau_sdb} — ${(d.sdb_options||[]).join(', ')||'—'}`:null,
-    d.type_sol?`Sol : ${d.type_sol} — ${(d.etat_sol||[]).join(', ')}`:null,
+    d.type_sol?`Sol : ${d.type_sol} — ${(d.etat_sol||[]).join(', ')||'—'}`:null,
+    (d.sol_options||[]).length?`Traitements sols : ${d.sol_options.join(', ')}`:null,
     d.vitres_option?`Vitres : ${d.vitres_option}`:null,
     (d.zones_options||[]).length?`Zones : ${d.zones_options.join(', ')}`:null,
     (d.speciales_options||[]).length?`Spéciales : ${d.speciales_options.join(', ')}`:null, '',
@@ -456,18 +458,19 @@ function markChanged(id,original){
 }
 
 async function saveTarif(id){
-  const tarif=allTarifs.find(t=>t.id===id); if(!tarif) return
+  const numId=parseInt(id)
+  const tarif=allTarifs.find(t=>t.id===numId); if(!tarif) return
   const newVal=parseFloat(document.getElementById(`val-${id}`).value)
   if(isNaN(newVal)) return
   document.getElementById(`savecell-${id}`).innerHTML='<span class="text-xs">...</span>'
-  const {error}=await db.schema('ecoclean').from('tarifs').update({valeur:newVal}).eq('id',id)
+  const {error}=await db.schema('ecoclean').from('tarifs').update({valeur:newVal}).eq('id',numId)
   if(error){toast('Erreur','error');return}
   await db.schema('ecoclean').from('tarifs_historique').insert({
     categorie:tarif.categorie,code:tarif.code,
     ancien_prix:parseFloat(tarif.valeur),nouveau_prix:newVal,
     modifie_par:'admin@ecoclean.fr',commentaire:'Modif admin'
   })
-  allTarifs=allTarifs.map(t=>t.id===id?{...t,valeur:newVal}:t)
+  allTarifs=allTarifs.map(t=>t.id===numId?{...t,valeur:newVal}:t)
   document.getElementById(`row-${id}`).style.background=''
   document.getElementById(`savecell-${id}`).innerHTML=''
   toast(`${tarif.label} mis à jour`)

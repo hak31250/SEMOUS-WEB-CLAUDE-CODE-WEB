@@ -752,13 +752,14 @@ async function submitForm() {
       estimation_ttc: r.surDevis ? null : r.estTTC,
       taux_tva: r.tauxTva||10,
       detail_calcul: r.surDevis ? {} : r.details,
-      sur_devis: r.surDevis, statut: 'nouveau', commentaire_interne: null,
+      sur_devis: r.surDevis, statut: 'nouveau',
+      commentaire_interne: v('commentaire_agence')||null,
     }
     const { error } = await db.schema('ecoclean').from('demandes').insert(demande)
     if (error) throw error
     document.getElementById('conf-ref').textContent = ref
     document.querySelectorAll('.step-view').forEach(s => s.classList.remove('active'))
-    document.getElementById('view-conf').classList.remove('hidden')
+    document.getElementById('view-conf').classList.add('active')
     window.scrollTo({top:0,behavior:'smooth'})
   } catch(err) {
     console.error(err)
