@@ -338,10 +338,10 @@ function renderExpanded(d){
         ${ir('Cuisine',d.niveau_cuisine?`${d.niveau_cuisine} — ${(d.cuisine_options||[]).join(', ')||'—'}`:null)}
         ${ir('SDB',d.niveau_sdb?`${d.niveau_sdb} — ${(d.sdb_options||[]).join(', ')||'—'}`:null)}
         ${d.type_sol?ir('Sol',`${d.type_sol} — ${(d.etat_sol||[]).join(', ')||'—'}`):''}
-        ${(d.sol_options||[]).length?ir('Traitements sols',(d.sol_options||[]).join(', '));:''}
+        ${(d.sol_options||[]).length?ir('Traitements sols',(d.sol_options||[]).join(', ')):''}
         ${ir('Vitres',d.vitres_option)}
-        ${(d.zones_options||[]).length?ir('Zones',d.zones_options.join(', ')): ''}
-        ${(d.speciales_options||[]).length?ir('Spéciales',d.speciales_options.join(', ')): ''}
+        ${(d.zones_options||[]).length?ir('Zones',d.zones_options.join(', ')):''}
+        ${(d.speciales_options||[]).length?ir('Spéciales',d.speciales_options.join(', ')):''}
         ${d.nb_photos?ir('Photos',`${d.nb_photos}`):''}
       </div>
     </div>
