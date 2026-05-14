@@ -121,13 +121,15 @@
   }
 
   async function load(){
-    const params=new URLSearchParams(window.location.search)
-    const id=params.get('id')
-    if(!id){showErr();return}
-    const {data}=await db.schema('ecoclean').from('demandes').select('*').eq('id',id).single()
-    if(!data){showErr();return}
-    await db.schema('ecoclean').from('demandes').update({statut:'pre_devis_genere',updated_at:new Date().toISOString()}).eq('id',id)
-    render(data)
+    try {
+      const params=new URLSearchParams(window.location.search)
+      const id=params.get('id')
+      if(!id){showErr();return}
+      const {data,error}=await db.schema('ecoclean').from('demandes').select('*').eq('id',id).single()
+      if(error||!data){showErr();return}
+      await db.schema('ecoclean').from('demandes').update({statut:'pre_devis_genere',updated_at:new Date().toISOString()}).eq('id',id)
+      render(data)
+    } catch(e) { showErr() }
   }
 
   function showErr(){
